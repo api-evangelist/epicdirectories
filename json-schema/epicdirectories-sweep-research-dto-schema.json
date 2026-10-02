@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/epicdirectories/main/json-schema/epicdirectories-sweep-research-dto-schema.json",
+  "title": "SweepResearchDto",
+  "x-generated": "2026-10-02",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/epicdirectories-openapi.json#/components/schemas/SweepResearchDto",
+  "type": "object",
+  "properties": {
+    "limit": {
+      "type": "number",
+      "description": "How many listings to queue this run. Capped at 100 regardless of what you send: each job is a request to somebody else's server, and a directory with ten thousand listings must not be able to point a burst that size at one host. The response reports `deferred` when the cap bit, and the next run picks up where this one stopped.",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 100
+    },
+    "force": {
+      "type": "boolean",
+      "description": "Re-read every listing regardless of how recently it was last read. Off by default, so a repeated sweep costs only the listings that have gone stale rather than re-fetching the whole directory.",
+      "default": false
+    },
+    "staleAfterDays": {
+      "type": "number",
+      "description": "Treat data older than this many days as stale and re-read it. **This is the knob for periodic refresh** — run the same sweep on a schedule and it re-reads only what has aged past the window. `0` means \"everything is stale\", which is `force` by another name.",
+      "minimum": 0,
+      "maximum": 3650,
+      "default": 90
+    },
+    "sources": {
+      "type": "array",
+      "description": "Which sources to gather from. Defaults to `site` alone.\n\nEach writes into fields prefixed with its own name — `site_title`, `google_rating` — so two sources describing the same thing can never overwrite each other. That convention exists because the unprefixed form already went wrong: a bare `rating` held 2,418 values from a partner import and one from Google, with nothing recording which was which.\n\n**`google_places` is billable.** Google charges per request, where `site` costs only a fetch, so it is never included by default — a sweep over thousands of listings has to ask for it. Matches are confidence-gated: Places returns its best guess with no score, and a listing whose title is not really a place would otherwise be attached to an unrelated nearby business.",
+      "default": [
+        "site"
+      ],
+      "items": {
+        "type": "string",
+        "enum": [
+          "site",
+          "google_places"
+        ]
+      }
+    },
+    "declareFields": {
+      "type": "boolean",
+      "description": "Create the attribute templates these sources write into, if the directory has not declared them already.\n\n**Send this once, on your first call.** Research only writes into fields the directory has declared — without a template for `site_title` there is nowhere for the title to go, and the sweep succeeds while writing nothing. This declares all of them in one step instead of eleven separate calls.\n\nTemplates it creates are marked `{ derived: true, source }`, which is what allows later sweeps to refresh them. **Templates that already exist are left exactly as they are** — if you declared `site_title` yourself and filled it in by hand, this will not quietly convert it into a field a sweep may overwrite.",
+      "default": false
+    },
+    "ingestOg": {
+      "type": "boolean",
+      "description": "Fetch each page's og:image and store it as a `site_og` media asset, rather than keeping only the URL. **On by default.**\n\nThe URL alone means every image you render is a hotlink to someone else's CDN. These are marketing sites — they redesign, change host, and rotate cache-busting paths, and when they do your listing shows a broken image with nothing to say it happened. Importing once makes the bytes yours.\n\nCosts one fetch and one stored image per listing, so set `false` if you only want the text fields. A listing that already has a `site_og` is left alone — re-running updates the `site_og_image` field but never replaces the stored asset.",
+      "default": true
+    },
+    "listingSlugs": {
+      "description": "Research these listings specifically, by slug, instead of letting the sweep choose.\n\nA named set is an **instruction**, so the staleness window is bypassed — asking for a listing by name gets it re-read. Unlike a screenshot this destroys nothing: each read is stored as its own snapshot, so the previous evidence survives.\n\nSlugs that match nothing come back as `unmatchedSlugs` rather than being silently dropped. Still subject to the per-run cap.",
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

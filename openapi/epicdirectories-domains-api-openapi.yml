@@ -1,0 +1,144 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Domains API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: Domains
+paths:
+  /v1/directories/{directoryId}/domains:
+    post:
+      operationId: DomainsController_create
+      summary: Add a custom domain to directory
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDomainDto'
+      responses:
+        '201':
+          description: Domain added successfully
+        '409':
+          description: Domain already in use
+      tags:
+      - Domains
+      security:
+      - bearer: []
+    get:
+      operationId: DomainsController_findAll
+      summary: List domains for directory
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of domains
+      tags:
+      - Domains
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/domains/{domainId}/primary:
+    post:
+      operationId: DomainsController_setPrimary
+      summary: Set domain as primary
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: domainId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Domain set as primary
+      tags:
+      - Domains
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/domains/{domainId}/verify:
+    post:
+      operationId: DomainsController_verifyDns
+      summary: Verify domain DNS configuration
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: domainId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: DNS verification result
+      tags:
+      - Domains
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/domains/{domainId}:
+    delete:
+      operationId: DomainsController_remove
+      summary: Remove a domain
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: domainId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Domain removed
+      tags:
+      - Domains
+      security:
+      - bearer: []
+components:
+  schemas:
+    CreateDomainDto:
+      type: object
+      properties:
+        domain:
+          type: string
+          description: Domain name
+          example: restaurants-nyc.com
+        isPrimary:
+          type: boolean
+          description: Set as primary domain for this directory
+      required:
+      - domain
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

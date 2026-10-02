@@ -1,0 +1,17 @@
+generated: '2026-10-02'
+method: generated
+generator: extract-docs-artifacts.py skills (local)
+source: openapi/epicdirectories-openapi.json
+skills:
+- file: skills/epicdirectories-payments-start-checkout.md
+  name: epicdirectories-payments-start-checkout
+  api: openapi/epicdirectories-openapi.json
+  operations:
+  - PaymentsController_offers
+  - PaymentsController_create
+- file: skills/epicdirectories-webhook-create-and-test.md
+  name: epicdirectories-webhook-create-and-test
+  api: openapi/epicdirectories-openapi.json
+  operations:
+  - WebhooksController_create
+  - WebhooksController_test

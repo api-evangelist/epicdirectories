@@ -1,0 +1,165 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories reviews (admin) API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: reviews (admin)
+paths:
+  /v1/directories/{directoryId}/reviews:
+    get:
+      operationId: ReviewsAdminController_list
+      summary: List the review queue
+      description: 'Defaults to `status=pending` — the queue that needs a decision. Also returns `countsByStatus` across the whole directory, so the UI can show that spam exists without the operator switching filters to find out.
+
+
+        Each row carries `sameSourceOnListing`: how many OTHER reviews on the same listing arrived from the same (hashed) source address. It is a hint, not a verdict — offices, campuses and mobile carriers put many real people behind one address.'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: status
+        required: false
+        in: query
+        description: Defaults to `pending`
+        schema:
+          enum:
+          - pending
+          - approved
+          - rejected
+          - spam
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Default 50, max 200
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Paginated reviews + counts by status
+        '404':
+          description: Directory not found or not yours
+      tags:
+      - reviews (admin)
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/reviews/{reviewId}:
+    get:
+      operationId: ReviewsAdminController_get
+      summary: Get one review, including its abuse metadata
+      description: Includes the hashed source address, user agent, Turnstile verdict and the submitter email — none of which any public read returns.
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: reviewId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The review
+        '404':
+          description: Not found
+      tags:
+      - reviews (admin)
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/reviews/{reviewId}/approve:
+    post:
+      operationId: ReviewsAdminController_approve
+      summary: Approve a review — this publishes it
+      description: 'Makes a stranger''s text publicly readable and moves the listing''s rating average. The listing''s `reviewCount` and `ratingSum` are recomputed in the same transaction.
+
+
+        Unlike accepting a submission — which lands as a draft, with a second gate before anyone sees it — an approved review is live immediately. There is no draft state here to catch a mistake. Returns 409 if the review is already approved.'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: reviewId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Approved and published
+        '404':
+          description: Not found
+        '409':
+          description: Already approved
+      tags:
+      - reviews (admin)
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/reviews/{reviewId}/reject:
+    post:
+      operationId: ReviewsAdminController_reject
+      summary: Reject a review, or unpublish an approved one
+      description: 'Pass `{ "spam": true }` to file it as spam instead of merely rejected, so abuse triage can tell "not a fit" from attack traffic.
+
+
+        Rejecting an already-approved review unpublishes it and removes its rating from the listing''s average, in the same transaction. Reversible — the row is retained and its status can flip back.'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: reviewId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectReviewDto'
+      responses:
+        '201':
+          description: Rejected
+        '404':
+          description: Not found
+      tags:
+      - reviews (admin)
+      security:
+      - bearer: []
+components:
+  schemas:
+    RejectReviewDto:
+      type: object
+      properties:
+        spam:
+          type: boolean
+          description: Mark as spam rather than merely rejected, so abuse triage can separate the two.
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

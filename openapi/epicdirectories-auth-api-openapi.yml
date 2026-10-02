@@ -1,0 +1,38 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Auth API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: Auth
+paths:
+  /v1/auth/session:
+    get:
+      operationId: AuthController_getSession
+      summary: Get the authenticated user (Clerk-resolved)
+      parameters: []
+      responses:
+        '200':
+          description: Session info
+        '401':
+          description: Not authenticated
+      tags:
+      - Auth
+      security:
+      - bearer: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

@@ -1,0 +1,264 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Attribute Templates API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: attribute-templates
+paths:
+  /v1/directories/{directoryId}/attribute-templates:
+    post:
+      operationId: AttributeTemplatesController_create
+      summary: Create a new attribute template
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAttributeTemplateDto'
+      responses:
+        '201':
+          description: Attribute template created successfully
+        '404':
+          description: Directory not found
+        '409':
+          description: Attribute key already exists
+      tags:
+      - attribute-templates
+      security:
+      - bearer: []
+    get:
+      operationId: AttributeTemplatesController_findAll
+      summary: List attribute templates
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingType
+        required: false
+        in: query
+        description: Filter by listing type
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of attribute templates
+      tags:
+      - attribute-templates
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/attribute-templates/{templateId}:
+    get:
+      operationId: AttributeTemplatesController_findOne
+      summary: Get attribute template details
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: templateId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Attribute template details
+        '404':
+          description: Attribute template not found
+      tags:
+      - attribute-templates
+      security:
+      - bearer: []
+    patch:
+      operationId: AttributeTemplatesController_update
+      summary: Update an attribute template
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: templateId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAttributeTemplateDto'
+      responses:
+        '200':
+          description: Attribute template updated successfully
+        '404':
+          description: Attribute template not found
+      tags:
+      - attribute-templates
+      security:
+      - bearer: []
+    delete:
+      operationId: AttributeTemplatesController_remove
+      summary: Delete an attribute template
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: templateId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Attribute template deleted successfully
+        '404':
+          description: Attribute template not found
+      tags:
+      - attribute-templates
+      security:
+      - bearer: []
+components:
+  schemas:
+    UpdateAttributeTemplateDto:
+      type: object
+      properties:
+        label:
+          type: string
+          description: Human-readable label
+        type:
+          type: string
+          description: Attribute data type
+          enum:
+          - string
+          - text
+          - number
+          - boolean
+          - enum
+          - multi
+          - multi_enum
+          - date
+          - datetime
+          - range
+          - url
+          - email
+          - phone
+          - richtext
+          - json
+        isFilterable:
+          type: boolean
+          description: Whether this attribute can be used in filters
+          default: false
+        isSortable:
+          type: boolean
+          description: Whether this attribute can be used for sorting
+          default: false
+        isSeoRelevant:
+          type: boolean
+          description: Whether this attribute is relevant for SEO
+          default: false
+        enumValues:
+          description: Allowed values for enum/multi_enum types
+          example:
+          - option1
+          - option2
+          type: array
+          items:
+            type: string
+        settings:
+          type: object
+          description: Additional settings (validation rules, display hints, etc.)
+          example:
+            min: 0
+            max: 100
+            unit: USD
+    CreateAttributeTemplateDto:
+      type: object
+      properties:
+        listingType:
+          type: string
+          description: Listing type this template applies to (null = all types)
+        key:
+          type: string
+          description: Unique key for the attribute
+        label:
+          type: string
+          description: Human-readable label
+        type:
+          type: string
+          description: Attribute data type
+          enum:
+          - string
+          - text
+          - number
+          - boolean
+          - enum
+          - multi
+          - multi_enum
+          - date
+          - datetime
+          - range
+          - url
+          - email
+          - phone
+          - richtext
+          - json
+        isFilterable:
+          type: boolean
+          description: Whether this attribute can be used in filters
+          default: false
+        isSortable:
+          type: boolean
+          description: Whether this attribute can be used for sorting
+          default: false
+        isSeoRelevant:
+          type: boolean
+          description: Whether this attribute is relevant for SEO
+          default: false
+        enumValues:
+          description: Allowed values for enum/multi_enum types
+          example:
+          - option1
+          - option2
+          type: array
+          items:
+            type: string
+        settings:
+          type: object
+          description: Additional settings (validation rules, display hints, etc.)
+          example:
+            min: 0
+            max: 100
+            unit: USD
+      required:
+      - key
+      - label
+      - type
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

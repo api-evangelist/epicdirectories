@@ -1,0 +1,162 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Payments API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: Payments
+paths:
+  /public/v1/directories/{directory}/offers:
+    get:
+      operationId: PaymentsController_offers
+      summary: What this directory sells (anonymous)
+      description: 'Unauthenticated, and safe to call from a browser — it exposes no credential, no Stripe id and no redirect URL.
+
+
+        Returns one entry per product: `{ kind, enabled, priceCents?, currency?, name? }`.
+
+
+        **Render a button if and only if `priceCents` is present.** An entry with `enabled: true` and no price carries `misconfigured: true` instead — the operator has opted in and the terms are broken, so checkout would answer 503. That is reported rather than advertised.
+
+
+        **404 when the directory sells nothing at all**, and deliberately the same 404 as an unknown directory: the checkout routes refuse to tell those two apart so that this API cannot be used to enumerate slugs, and an endpoint that answered 200 for every directory that exists would hand that distinction straight back. A consumer sees no difference — either way there is nothing to render.
+
+
+        Prices come from the same function the CHARGE comes from, so a quote here and the amount Stripe collects cannot drift.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The products this directory sells
+        '404':
+          description: Directory not found, or it sells nothing
+      tags:
+      - Payments
+  /public/v1/directories/{directory}/listings/{listingType}/{listingSlug}/checkout:
+    post:
+      operationId: PaymentsController_create
+      summary: Start checkout for a premium listing boost (anonymous)
+      description: 'Unauthenticated. Requires the directory to have opted in via `monetizationPolicy.boost.enabled = true`; otherwise 404 — a directory sells nothing by default.
+
+
+        Returns a Stripe Checkout URL to redirect the buyer to. **Send no body.** The price, currency and return URLs all come from the directory''s own configuration, and a request carrying an `amountCents` (or anything else) is rejected with 400 rather than ignored.
+
+
+        The boost is permanent — there is no renewal — and a listing can therefore only be boosted once: a listing that is already premium returns 409 rather than taking money for nothing.
+
+
+        **Nothing is granted by this call, and nothing is granted by the buyer reaching the success URL.** The boost is applied when Stripe confirms payment over its webhook. A consumer must not treat the success redirect as proof of payment; it is reachable by anyone who knows the URL.
+
+
+        Rate limited to **10 per hour per IP**.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingType
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingSlug
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCheckoutDto'
+      responses:
+        '200':
+          description: Checkout session created; redirect the buyer to `url`
+        '400':
+          description: A body field was sent — this endpoint accepts none
+        '404':
+          description: Directory or listing not found, or boosts not enabled
+        '409':
+          description: The listing is already a premium listing
+        '429':
+          description: Rate limit exceeded
+        '503':
+          description: Payments are not configured, or the directory's boost settings are invalid
+      tags:
+      - Payments
+  /public/v1/directories/{directory}/checkout/{kind}:
+    post:
+      operationId: PaymentsController_createContent
+      summary: Start checkout for a guest post or niche edit (anonymous)
+      description: 'Unauthenticated. `kind` is `guest_post` or `niche_edit`. Requires the directory to have opted in via `monetizationPolicy.guestPost.enabled = true` (or `nicheEdit`); otherwise 404 — a directory sells nothing by default, and enabling one product never enables another.
+
+
+        Returns a Stripe Checkout URL to redirect the buyer to. **Send no body.** The price, currency and return URLs all come from the directory''s own configuration, and a request carrying an `amountCents` (or anything else) is rejected with 400 rather than ignored.
+
+
+        **The buyer''s brief is collected ON THE STRIPE PAGE**, as up to three custom fields — the link destination, the anchor text, and either a topic (guest post) or which existing post to edit (niche edit). They come back inside the signed webhook, so a paid order always has a brief. The article copy itself does not fit a Stripe field and arrives by email.
+
+
+        Unlike the boost route there is **no duplicate guard**: these are repeatable, and someone may legitimately buy three guest posts.
+
+
+        **Nothing is created by this call, and nothing is created by the buyer reaching the success URL.** The order is created when Stripe confirms payment over its webhook. A consumer must not treat the success redirect as proof of payment; it is reachable by anyone who knows the URL.
+
+
+        Rate limited to **10 per hour per IP**.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: kind
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCheckoutDto'
+      responses:
+        '200':
+          description: Checkout session created; redirect the buyer to `url`
+        '400':
+          description: A body field was sent, or `kind` was `listing_boost` — premium listings are bought through the listing checkout route
+        '404':
+          description: Unknown product, directory not found, or this product is not enabled
+        '429':
+          description: Rate limit exceeded
+        '503':
+          description: Payments are not configured, or the directory's settings for this product are invalid
+      tags:
+      - Payments
+components:
+  schemas:
+    CreateCheckoutDto:
+      type: object
+      properties: {}
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

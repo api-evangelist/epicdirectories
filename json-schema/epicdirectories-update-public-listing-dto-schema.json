@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/epicdirectories/main/json-schema/epicdirectories-update-public-listing-dto-schema.json",
+  "title": "UpdatePublicListingDto",
+  "x-generated": "2026-10-02",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/epicdirectories-openapi.json#/components/schemas/UpdatePublicListingDto",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Display title"
+    },
+    "status": {
+      "type": "string",
+      "description": "Lifecycle status",
+      "enum": [
+        "draft",
+        "published",
+        "hidden"
+      ],
+      "default": "draft"
+    },
+    "parentId": {
+      "type": "object",
+      "description": "Parent listing UUID — the id returned on any read. Mutually exclusive with parentSlug; sending both is a 400. Must belong to the same directory. On PATCH, send `null` to detach the listing from its parent."
+    },
+    "parentSlug": {
+      "type": "string",
+      "description": "Parent listing slug (resolved within the same directory). Requires parentListingType whenever the parent is a different type than this listing — which, for the series/event hierarchy, is always. Prefer parentId if you have it."
+    },
+    "parentListingType": {
+      "type": "string",
+      "description": "Parent listing type. Defaults to this listing's type when omitted."
+    },
+    "relationshipType": {
+      "type": "string",
+      "description": "Relationship type to parent (e.g. series_of, brand_of, chapter_of)"
+    },
+    "geo": {
+      "type": "object",
+      "description": "Geographic data. **Full-replace on PATCH** — sending `{ geo: { lat: 36.17 } }` wipes every other geo key. To partially update, GET the listing first and merge: `PATCH { geo: { ...existing.geo, lat: 36.17 } }`.\n\n**Recognized keys** (free-form JSON, but these are what the admin UI and adapters read):\n- `lat`, `lng` — numbers\n- `country` — ISO 3166-1 alpha-2, e.g. `US`\n- `admin1` — state/region as an ISO 3166-2 fragment, e.g. `OH`. **This is the state field** — `state` and `region` are NOT read, and using them leaves the admin Location section blank.\n- `city`, `streetAddress`, `postalCode`\n- `timezone` — IANA, e.g. `America/New_York`\n\nAny other key is stored and returned untouched, but nothing renders it."
+    },
+    "canonicalFields": {
+      "type": "object",
+      "description": "Canonical fields (queryable, indexable). Common keys: address, phone, email, website. **Full-replace on PATCH** — sending one key drops every other. Read-modify-write when partially updating."
+    },
+    "editorialFields": {
+      "type": "object",
+      "description": "Editorial copy. Conventional keys: description, seoTitle, seoDescription, ogImage, noindex, canonicalUrl, synonyms, audiences, pricing. **Full-replace on PATCH** — sending `{ editorialFields: { seoTitle: \"X\" } }` wipes the description and every other key. Admin UI handles this by GET → spread → PATCH; third-party callers must do the same when partially updating."
+    },
+    "publishAt": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Scheduled publish (ISO 8601). Listings with status:draft + publishAt in the past surface as published on read endpoints. Pass null to clear."
+    },
+    "taxonomies": {
+      "type": "object",
+      "description": "Taxonomy term assignments. Keys are taxonomy slugs; values are arrays of term slugs. Each taxonomy you list gets its assignments replaced — taxonomies you DON'T list are left alone (per-taxonomy partial-update). All slugs must exist or the whole request returns 400 with the unknown pairs (no partial writes). Use [] to clear a taxonomy."
+    },
+    "slug": {
+      "type": "string",
+      "description": "New slug. Renaming **preserves the old slug as an alias**: every read that addresses this listing by the old `(listingType, slug)` keeps resolving, and answers with the new slug — so a consumer can compare the two and emit a 301 instead of serving the same listing at two live URLs. `GET .../listing-aliases` returns the whole redirect map for a directory in one call.\n\nRenaming back to a slug this listing previously used consumes that alias rather than creating a cycle. A slug held live, or held as an alias by a **different** listing, is a 409.",
+      "pattern": "^[a-z0-9-]+$"
+    }
+  }
+}

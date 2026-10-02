@@ -1,0 +1,292 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Media Assets API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: media-assets
+paths:
+  /v1/directories/{directoryId}/listings/{listingId}/media:
+    post:
+      operationId: MediaAssetsController_create
+      summary: Create a media asset for a listing
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMediaAssetDto'
+      responses:
+        '201':
+          description: Media asset created successfully
+      tags:
+      - media-assets
+      security:
+      - bearer: []
+    get:
+      operationId: MediaAssetsController_findAll
+      summary: List media assets for a listing
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: status
+        required: false
+        in: query
+        description: Filter by status
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of media assets
+      tags:
+      - media-assets
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/listings/{listingId}/media/upload:
+    post:
+      operationId: MediaAssetsController_uploadFile
+      summary: Upload an image file directly (admin)
+      description: Multipart upload — sends the original to R2, creates a MediaAsset row, and queues a worker job to generate thumb/card/hero variants. The original is available at the returned cdnUrl immediately.
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+              - file
+      responses:
+        '201':
+          description: Media asset created with original URL; variants generate async
+        '400':
+          description: Empty file or unsupported MIME type
+        '404':
+          description: Listing not found
+      tags:
+      - media-assets
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/listings/{listingId}/media/bulk:
+    post:
+      operationId: MediaAssetsController_bulkCreate
+      summary: Bulk create media assets
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '201':
+          description: Media assets created
+      tags:
+      - media-assets
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/listings/{listingId}/media/{assetId}:
+    get:
+      operationId: MediaAssetsController_findOne
+      summary: Get a specific media asset
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: assetId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Media asset details
+        '404':
+          description: Media asset not found
+      tags:
+      - media-assets
+      security:
+      - bearer: []
+    patch:
+      operationId: MediaAssetsController_update
+      summary: Update a media asset
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: assetId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMediaAssetDto'
+      responses:
+        '200':
+          description: Media asset updated
+        '404':
+          description: Media asset not found
+      tags:
+      - media-assets
+      security:
+      - bearer: []
+    delete:
+      operationId: MediaAssetsController_remove
+      summary: Delete a media asset
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: assetId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Media asset deleted
+        '404':
+          description: Media asset not found
+      tags:
+      - media-assets
+      security:
+      - bearer: []
+components:
+  schemas:
+    CreateMediaAssetDto:
+      type: object
+      properties:
+        source:
+          type: string
+          description: Source of the media (e.g., upload, google_places, yelp)
+          example: upload
+        sourceRef:
+          type: string
+          description: Reference to source (URL or external ID)
+          example: https://example.com/image.jpg
+        variants:
+          type: object
+          description: Variant configurations
+          example:
+            thumbnail:
+              width: 150
+              height: 150
+      required:
+      - source
+      - sourceRef
+    UpdateMediaAssetDto:
+      type: object
+      properties:
+        cdnUrl:
+          type: string
+          description: Updated CDN URL
+        variants:
+          type: object
+          description: Updated variants configuration
+        status:
+          type: string
+          description: Status (pending, processing, ready, failed)
+        alt:
+          type: object
+          description: Alt text for accessibility + image SEO. Pass empty string to clear.
+        caption:
+          type: object
+          description: Caption rendered alongside the image. Pass empty string to clear.
+        role:
+          type: string
+          description: Asset role on the listing — disambiguates which image is the page hero vs the brand logo vs a gallery image.
+          enum:
+          - hero
+          - thumbnail
+          - gallery
+          - logo
+          - site_screenshot
+          - site_og
+        sortOrder:
+          type: number
+          description: Display order within a listing (ascending). 0 first.
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

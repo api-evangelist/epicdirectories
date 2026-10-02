@@ -1,0 +1,419 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Directories API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: Directories
+paths:
+  /v1/directories/templates:
+    get:
+      operationId: DirectoriesController_listTemplates
+      summary: List available directory archetype templates
+      description: Returns metadata for the four archetypes (local, product, series, custom) so admin UIs can render a template picker. Public — no sensitive info.
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+      - Directories
+      security:
+      - bearer: []
+  /v1/directories/from-template:
+    post:
+      operationId: DirectoriesController_createFromTemplate
+      summary: Create a directory from an archetype template
+      description: Creates the Directory + listingTypes + AttributeTemplates + Taxonomies + (optionally) example Recipes in a single transaction. Slug is auto-derived from name.
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFromTemplateDto'
+      responses:
+        '201':
+          description: Directory created with template scaffolding
+        '409':
+          description: Slug derived from name conflicts with an existing directory
+      tags:
+      - Directories
+      security:
+      - bearer: []
+  /v1/directories:
+    post:
+      operationId: DirectoriesController_create
+      summary: Create a new directory (low-level — prefer /from-template for typical use)
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDirectoryDto'
+      responses:
+        '201':
+          description: Directory created successfully
+        '409':
+          description: Directory slug already exists
+      tags:
+      - Directories
+      security:
+      - bearer: []
+    get:
+      operationId: DirectoriesController_findAll
+      summary: List all directories for account
+      parameters: []
+      responses:
+        '200':
+          description: List of directories
+      tags:
+      - Directories
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}:
+    get:
+      operationId: DirectoriesController_findOne
+      summary: Get directory details
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Directory details
+        '404':
+          description: Directory not found
+      tags:
+      - Directories
+      security:
+      - bearer: []
+    patch:
+      operationId: DirectoriesController_update
+      summary: Update a directory
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDirectoryDto'
+      responses:
+        '200':
+          description: Directory updated successfully
+        '404':
+          description: Directory not found
+      tags:
+      - Directories
+      security:
+      - bearer: []
+    delete:
+      operationId: DirectoriesController_remove
+      summary: Delete a directory
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Directory deleted successfully
+        '404':
+          description: Directory not found
+      tags:
+      - Directories
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/turnstile:
+    get:
+      operationId: DirectoryTurnstileController_get
+      summary: Which Turnstile widget verifies this directory's public forms
+      description: 'Reports the credentials IN EFFECT, which may be the platform fallback rather than this directory''s own — `configured: false` with `source: "platform"` means the forms are checked against EpicDirectories'' widget, which only issues tokens on hostnames registered against it. On any other domain that state accepts every visitor and records every submission as spam. The secret is never returned; `secretLast4` is there to confirm a rotation landed.'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Current Turnstile configuration
+        '404':
+          description: Directory not found, or not in your account
+      tags:
+      - Directories
+      security:
+      - bearer: []
+    put:
+      operationId: DirectoryTurnstileController_set
+      summary: Register or rotate this directory's Turnstile widget
+      description: 'Both halves are required on every write, including one that only means to change the site key — they are a pair and are replaced together, so a mismatched pair cannot be created through this API. The secret is checked against Cloudflare before it is stored: an unrecognised one is a 400 and nothing is saved. PUT rather than POST because it is idempotent and there is at most one widget per directory; rotating is the same call.'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetDirectoryTurnstileDto'
+      responses:
+        '200':
+          description: Widget registered; returns the same shape as GET
+        '400':
+          description: Cloudflare does not recognise the secret — commonly the site key pasted twice
+        '404':
+          description: Directory not found, or not in your account
+      tags:
+      - Directories
+      security:
+      - bearer: []
+    delete:
+      operationId: DirectoryTurnstileController_remove
+      summary: Stop using this directory's own widget
+      description: 'Falls the directory back to the platform widget — NOT to "no verification". On a hostname that widget does not cover, that means every submission is recorded as spam behind the same 202 the form has always returned. Idempotent: clearing a directory that has no widget is a 204.'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Cleared, or there was nothing to clear
+        '404':
+          description: Directory not found, or not in your account
+      tags:
+      - Directories
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/turnstile/provision:
+    post:
+      operationId: DirectoryTurnstileController_provision
+      summary: Create or reconcile this directory's own widget on Cloudflare
+      description: 'Gives the directory a Turnstile widget of its own, registered against the domain recorded on it plus that domain''s `www` alias, and stores both halves. Normally nobody calls this by hand — setting `domain` on a directory does it — so this route is for the two cases that need a nudge: a directory that already had a domain before provisioning existed, and one whose Cloudflare hostname list was edited in the dashboard and has drifted from what we last sent. It always re-sends the hostname list rather than trusting our own record of it.
+
+
+        Idempotent, and it refuses to touch a widget registered by hand: those come back `skipped-manual` and no request is made to Cloudflare. A directory with no `domain` comes back `skipped-no-domain` — there is no hostname to register.'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: What was done, plus the same shape as GET
+        '404':
+          description: Directory not found, or not in your account
+        '503':
+          description: Cloudflare could not be used — no API token on this service, or Cloudflare refused. The message is the one to act on; nothing was changed.
+      tags:
+      - Directories
+      security:
+      - bearer: []
+components:
+  schemas:
+    SetDirectoryTurnstileDto:
+      type: object
+      properties:
+        siteKey:
+          type: string
+          description: The Turnstile SITE key — the public half, rendered in the page as data-sitekey. Published through /export so the form and the verifier cannot disagree about which widget is in use.
+          example: 0x4AAAAAAECip5aOzNT_oCWH
+        secret:
+          type: string
+          description: 'The Turnstile SECRET key — the private half. Stored, never returned by any endpoint in any shape. Required on every write, including one that only means to change the site key: the two are a pair and are replaced together.'
+          example: 0x4AAAAAAECip…
+      required:
+      - siteKey
+      - secret
+    CreateFromTemplateDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Display name for the new directory
+        template:
+          type: string
+          description: Archetype template to apply
+          enum:
+          - local
+          - product
+          - series
+          - custom
+      required:
+      - name
+      - template
+    CreateDirectoryDto:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: URL-friendly slug for the directory
+        name:
+          type: string
+          description: Display name of the directory
+        domain:
+          type:
+          - object
+          - 'null'
+          description: Public domain this directory is published on, as a bare hostname. A pasted URL is normalised — scheme, port, path and case are stripped, and a leading "www." is KEPT because it is part of the hostname. Null or an empty string clears it.
+          example: golfthis.com
+        listingTypes:
+          type: object
+          description: Listing types supported by this directory
+          example:
+          - event
+          - series
+        seoPolicy:
+          type: object
+          description: SEO policy configuration
+        monetizationPolicy:
+          type: object
+          description: Monetization policy configuration
+        mediaPolicy:
+          type: object
+          description: Media policy configuration
+        submissionPolicy:
+          type: object
+          description: 'Opt-in for anonymous public writes. Absent/empty accepts nothing. Keys: `suggestions`, `feedback`, `reviews`, `comments` (page comments). Each flag must be exactly true — see common/directory-open-policy.ts.'
+          example:
+            suggestions: true
+            feedback: true
+        enrichmentPolicy:
+          type: object
+          description: 'Site-probe config. Absent = ON with defaults — unlike submissionPolicy, which is opt-in because it accepts untrusted writes. Probing writes nothing public. Keys: { probe: bool, autoApprove: bool, rubric?: string, linkSweepAttributes?: [{ key, liveness? }] }.
+
+
+            `linkSweepAttributes` adds this directory’s own url-typed ATTRIBUTE values to the link sweep, which otherwise checks only the one URL in canonicalFields. An explicit allowlist, in priority order — enrichment writes url-typed attributes of its own (`site_og_image`, `site_canonical_url`, `site_final_url`) that nobody wants checked, and one sweep run is capped, so something has to go first. `liveness: "endpoint"` marks a field that is a machine surface rather than a page: any HTTP response counts as alive, and only an unreachable host or a 410 is dead. An API root answering 404 is normal.
+
+
+            `sweepSchedule` makes the link sweep run on its own: `true` for daily, or `{ "everyHours": 24 }`. Absent means OFF, and that default is deliberate — unlike `probe`, which is on by default because a sweep only ever ran when a person asked for one. Removing the person does not keep that safe: every directory on the platform reads `probe !== false` today, so deriving the schedule from it would enrol all 74,387 listings in a perpetual crawl. `probe: false` still wins over any schedule. Catch-up after a capped run is automatic, so no cadence shorter than an hour is accepted or needed.
+
+
+            `linkDeadOn` decides what counts as dead beyond an unreachable host: `{ tls: true }` counts a certificate fault, `{ timeoutAfter: 2 }` counts a URL that has timed out that many checks in a row. Both default OFF and neither can be turned on globally — three Convention Grid listings have a `www.` certificate that does not cover the host while serving 200 at the apex, and that report deliberately leaves them out.'
+          example:
+            probe: true
+            linkSweepAttributes:
+            - key: docs_url
+            - key: openapi_url
+            - key: base_url
+              liveness: endpoint
+            - key: signup_url
+            linkDeadOn:
+              tls: true
+              timeoutAfter: 2
+            sweepSchedule:
+              everyHours: 24
+        theme:
+          type: string
+          description: Theme identifier
+          example: default
+        themeSettings:
+          type: object
+          description: Theme settings (colors etc.)
+          example:
+            primaryColor: '#3b82f6'
+            secondaryColor: '#1e40af'
+      required:
+      - slug
+      - name
+      - listingTypes
+    UpdateDirectoryDto:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: URL-friendly slug for the directory
+        name:
+          type: string
+          description: Display name of the directory
+        domain:
+          type:
+          - object
+          - 'null'
+          description: Public domain this directory is published on, as a bare hostname. A pasted URL is normalised — scheme, port, path and case are stripped, and a leading "www." is KEPT because it is part of the hostname. Null or an empty string clears it.
+          example: golfthis.com
+        listingTypes:
+          type: object
+          description: Listing types supported by this directory
+          example:
+          - event
+          - series
+        seoPolicy:
+          type: object
+          description: SEO policy configuration
+        monetizationPolicy:
+          type: object
+          description: Monetization policy configuration
+        mediaPolicy:
+          type: object
+          description: Media policy configuration
+        submissionPolicy:
+          type: object
+          description: 'Opt-in for anonymous public writes. Absent/empty accepts nothing. Keys: `suggestions`, `feedback`, `reviews`, `comments` (page comments). Each flag must be exactly true — see common/directory-open-policy.ts.'
+          example:
+            suggestions: true
+            feedback: true
+        enrichmentPolicy:
+          type: object
+          description: 'Site-probe config. Absent = ON with defaults — unlike submissionPolicy, which is opt-in because it accepts untrusted writes. Probing writes nothing public. Keys: { probe: bool, autoApprove: bool, rubric?: string, linkSweepAttributes?: [{ key, liveness? }] }.
+
+
+            `linkSweepAttributes` adds this directory’s own url-typed ATTRIBUTE values to the link sweep, which otherwise checks only the one URL in canonicalFields. An explicit allowlist, in priority order — enrichment writes url-typed attributes of its own (`site_og_image`, `site_canonical_url`, `site_final_url`) that nobody wants checked, and one sweep run is capped, so something has to go first. `liveness: "endpoint"` marks a field that is a machine surface rather than a page: any HTTP response counts as alive, and only an unreachable host or a 410 is dead. An API root answering 404 is normal.
+
+
+            `sweepSchedule` makes the link sweep run on its own: `true` for daily, or `{ "everyHours": 24 }`. Absent means OFF, and that default is deliberate — unlike `probe`, which is on by default because a sweep only ever ran when a person asked for one. Removing the person does not keep that safe: every directory on the platform reads `probe !== false` today, so deriving the schedule from it would enrol all 74,387 listings in a perpetual crawl. `probe: false` still wins over any schedule. Catch-up after a capped run is automatic, so no cadence shorter than an hour is accepted or needed.
+
+
+            `linkDeadOn` decides what counts as dead beyond an unreachable host: `{ tls: true }` counts a certificate fault, `{ timeoutAfter: 2 }` counts a URL that has timed out that many checks in a row. Both default OFF and neither can be turned on globally — three Convention Grid listings have a `www.` certificate that does not cover the host while serving 200 at the apex, and that report deliberately leaves them out.'
+          example:
+            probe: true
+            linkSweepAttributes:
+            - key: docs_url
+            - key: openapi_url
+            - key: base_url
+              liveness: endpoint
+            - key: signup_url
+            linkDeadOn:
+              tls: true
+              timeoutAfter: 2
+            sweepSchedule:
+              everyHours: 24
+        theme:
+          type: string
+          description: Theme identifier
+          example: default
+        themeSettings:
+          type: object
+          description: Theme settings (colors etc.)
+          example:
+            primaryColor: '#3b82f6'
+            secondaryColor: '#1e40af'
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

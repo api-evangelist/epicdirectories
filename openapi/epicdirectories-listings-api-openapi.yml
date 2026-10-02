@@ -1,0 +1,339 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Listings API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: Listings
+paths:
+  /v1/directories/{directoryId}/listings:
+    post:
+      operationId: ListingsController_create
+      summary: Create a new listing
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateListingDto'
+      responses:
+        '201':
+          description: Listing created successfully
+        '404':
+          description: Directory not found
+        '409':
+          description: Listing slug already exists
+      tags:
+      - Listings
+      security:
+      - bearer: []
+    get:
+      operationId: ListingsController_findAll
+      summary: List listings with filters
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingType
+        required: false
+        in: query
+        description: Filter by listing type
+        schema:
+          type: string
+      - name: status
+        required: false
+        in: query
+        description: Filter by status
+        schema:
+          enum:
+          - draft
+          - published
+          - hidden
+          type: string
+      - name: q
+        required: false
+        in: query
+        description: Search query. Case-insensitive substring match against **title or slug** — after an import the slug is often the only handle you have.
+        schema:
+          type: string
+      - name: parentId
+        required: false
+        in: query
+        description: Filter by parent listing ID
+        schema:
+          type: string
+      - name: hasParent
+        required: false
+        in: query
+        description: Filter listings that have a parent
+        schema:
+          type: boolean
+      - name: termId
+        required: false
+        in: query
+        description: Filter by taxonomy term ID
+        schema:
+          type: string
+      - name: city
+        required: false
+        in: query
+        description: Filter by city (from geo JSON)
+        schema:
+          type: string
+      - name: country
+        required: false
+        in: query
+        description: Filter by country (from geo JSON)
+        schema:
+          type: string
+      - name: admin1
+        required: false
+        in: query
+        description: Filter by admin1/state (from geo JSON)
+        schema:
+          type: string
+      - name: postalCode
+        required: false
+        in: query
+        description: Filter by postal code (from geo JSON)
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Page number
+        schema:
+          default: 1
+          type: number
+      - name: limit
+        required: false
+        in: query
+        description: Items per page
+        schema:
+          default: 20
+          type: number
+      responses:
+        '200':
+          description: Paginated list of listings
+      tags:
+      - Listings
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/listings/{listingId}:
+    get:
+      operationId: ListingsController_findOne
+      summary: Get listing details
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Listing details with relationships
+        '404':
+          description: Listing not found
+      tags:
+      - Listings
+      security:
+      - bearer: []
+    patch:
+      operationId: ListingsController_update
+      summary: Update a listing
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateListingDto'
+      responses:
+        '200':
+          description: Listing updated successfully
+        '404':
+          description: Listing not found
+        '409':
+          description: Listing slug already exists
+      tags:
+      - Listings
+      security:
+      - bearer: []
+    delete:
+      operationId: ListingsController_remove
+      summary: Delete a listing
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Listing deleted successfully
+        '404':
+          description: Listing not found
+      tags:
+      - Listings
+      security:
+      - bearer: []
+components:
+  schemas:
+    CreateListingDto:
+      type: object
+      properties:
+        listingType:
+          type: string
+          description: Type of listing (e.g., event, series, tool)
+        slug:
+          type: string
+          description: URL-friendly slug for the listing
+        title:
+          type: string
+          description: Title of the listing
+        status:
+          type: string
+          description: Listing status
+          enum:
+          - draft
+          - published
+          - hidden
+          default: draft
+        parentId:
+          type:
+          - object
+          - 'null'
+          description: Parent listing ID for hierarchical relationships. Pass null to clear.
+        relationshipType:
+          type:
+          - object
+          - 'null'
+          description: Relationship type (e.g., series_of, brand_of, chapter_of). Pass null to clear.
+        geo:
+          type: object
+          description: Geographic data (country, admin1, city, neighborhood, coordinates)
+          example:
+            country: US
+            admin1: CA
+            city: San Francisco
+            lat: 37.7749
+            lng: -122.4194
+        canonicalFields:
+          type: object
+          description: Canonical fields (queryable, indexable)
+          example:
+            website: https://example.com
+            phone: +1-555-555-5555
+        editorialFields:
+          type: object
+          description: Editorial fields (descriptions, notes)
+          example:
+            description: A great place...
+            editorNotes: Verified Jan 2024
+        publishAt:
+          type:
+          - object
+          - 'null'
+          description: Scheduled publish time (ISO 8601). When set on a status:draft listing, public read endpoints surface it as published once the time has passed — no cron required, status column stays as draft until manually published. Pass null to clear.
+          example: '2026-12-31T09:00:00Z'
+      required:
+      - listingType
+      - slug
+      - title
+    UpdateListingDto:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: URL-friendly slug for the listing
+        title:
+          type: string
+          description: Title of the listing
+        status:
+          type: string
+          description: Listing status
+          enum:
+          - draft
+          - published
+          - hidden
+          default: draft
+        parentId:
+          type:
+          - object
+          - 'null'
+          description: Parent listing ID for hierarchical relationships. Pass null to clear.
+        relationshipType:
+          type:
+          - object
+          - 'null'
+          description: Relationship type (e.g., series_of, brand_of, chapter_of). Pass null to clear.
+        geo:
+          type: object
+          description: Geographic data (country, admin1, city, neighborhood, coordinates)
+          example:
+            country: US
+            admin1: CA
+            city: San Francisco
+            lat: 37.7749
+            lng: -122.4194
+        canonicalFields:
+          type: object
+          description: Canonical fields (queryable, indexable)
+          example:
+            website: https://example.com
+            phone: +1-555-555-5555
+        editorialFields:
+          type: object
+          description: Editorial fields (descriptions, notes)
+          example:
+            description: A great place...
+            editorNotes: Verified Jan 2024
+        publishAt:
+          type:
+          - object
+          - 'null'
+          description: Scheduled publish time (ISO 8601). When set on a status:draft listing, public read endpoints surface it as published once the time has passed — no cron required, status column stays as draft until manually published. Pass null to clear.
+          example: '2026-12-31T09:00:00Z'
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

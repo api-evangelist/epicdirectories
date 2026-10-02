@@ -1,0 +1,313 @@
+generated: '2026-10-02'
+method: derived
+generator: derive-vocabulary.py
+source: openapi/epicdirectories-openapi.json
+vocabulary:
+  name: EpicDirectories Domain Vocabulary
+  description: 'Terms declared by EpicDirectories''s own API contract: its resource groups, objects and enumerations, with the contract''s definitions.
+    Derived, not authored.'
+  version: '2026-10-02'
+  terms:
+  - term: CreateFromTemplateDto
+    definition: 'Object declared by the contract with fields: name, template.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateFromTemplateDto
+  - term: CreateDirectoryDto
+    definition: 'Object declared by the contract with fields: slug, name, domain, listingTypes, seoPolicy, monetizationPolicy, mediaPolicy, submissionPolicy,
+      enrichmentPolicy, theme, themeSettings.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateDirectoryDto
+  - term: UpdateDirectoryDto
+    definition: 'Object declared by the contract with fields: slug, name, domain, listingTypes, seoPolicy, monetizationPolicy, mediaPolicy, submissionPolicy,
+      enrichmentPolicy, theme, themeSettings.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdateDirectoryDto
+  - term: SetDirectoryTurnstileDto
+    definition: 'Object declared by the contract with fields: siteKey, secret.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/SetDirectoryTurnstileDto
+  - term: CreateSubmissionDto
+    definition: 'Object declared by the contract with fields: title, url, description, category, email, turnstileToken, website2.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateSubmissionDto
+  - term: CreateFeedbackDto
+    definition: 'Object declared by the contract with fields: kind, message, email, turnstileToken, website2.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateFeedbackDto
+  - term: AcceptSubmissionDto
+    definition: 'Object declared by the contract with fields: listingType, slug, listingStatus, title.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/AcceptSubmissionDto
+  - term: RejectSubmissionDto
+    definition: 'Object declared by the contract with fields: spam.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/RejectSubmissionDto
+  - term: CreateWebhookDto
+    definition: 'Object declared by the contract with fields: name, url, events, isActive, secret, debounceMs.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateWebhookDto
+  - term: UpdateWebhookDto
+    definition: 'Object declared by the contract with fields: name, url, events, isActive, secret, debounceMs.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdateWebhookDto
+  - term: CreateApiKeyDto
+    definition: 'Object declared by the contract with fields: name, directoryId, scopes, expiresAt.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateApiKeyDto
+  - term: UpdateApiKeyDto
+    definition: 'Object declared by the contract with fields: name, scopes, expiresAt.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdateApiKeyDto
+  - term: CreateListingDto
+    definition: 'Object declared by the contract with fields: listingType, slug, title, status, parentId, relationshipType, geo, canonicalFields,
+      editorialFields, publishAt.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateListingDto
+  - term: UpdateListingDto
+    definition: 'Object declared by the contract with fields: slug, title, status, parentId, relationshipType, geo, canonicalFields, editorialFields,
+      publishAt.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdateListingDto
+  - term: CreateAttributeTemplateDto
+    definition: 'Object declared by the contract with fields: listingType, key, label, type, isFilterable, isSortable, isSeoRelevant, enumValues,
+      settings.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateAttributeTemplateDto
+  - term: UpdateAttributeTemplateDto
+    definition: 'Object declared by the contract with fields: label, type, isFilterable, isSortable, isSeoRelevant, enumValues, settings.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdateAttributeTemplateDto
+  - term: CreateTaxonomyDto
+    definition: 'Object declared by the contract with fields: name, slug, structure.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateTaxonomyDto
+  - term: UpdateTaxonomyDto
+    definition: 'Object declared by the contract with fields: name.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdateTaxonomyDto
+  - term: CreateTermDto
+    definition: 'Object declared by the contract with fields: slug, label, parentTermId, metadata.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateTermDto
+  - term: UpdateTermDto
+    definition: 'Object declared by the contract with fields: label, parentTermId, metadata.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdateTermDto
+  - term: AttributeValueDto
+    definition: 'Object declared by the contract with fields: attributeTemplateId, value.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/AttributeValueDto
+  - term: SetAttributesDto
+    definition: 'Object declared by the contract with fields: attributes.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/SetAttributesDto
+  - term: BulkSetAttributesDto
+    definition: 'Object declared by the contract with fields: listingIds, attributes.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/BulkSetAttributesDto
+  - term: CreateJobDto
+    definition: 'Object declared by the contract with fields: jobType, input.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateJobDto
+  - term: CreateRecipeDto
+    definition: 'Object declared by the contract with fields: recipeType, slug, scope, constraints, ranking, seo.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateRecipeDto
+  - term: UpdateRecipeDto
+    definition: 'Object declared by the contract with fields: recipeType, slug, scope, constraints, ranking, seo.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdateRecipeDto
+  - term: PublicCreateTermDto
+    definition: 'Object declared by the contract with fields: slug, label, parentTermId, metadata, parentSlug.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/PublicCreateTermDto
+  - term: PublicSubmissionPolicyDto
+    definition: 'Object declared by the contract with fields: suggestions, feedback, reviews, comments.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/PublicSubmissionPolicyDto
+  - term: UpdatePublicDirectoryDto
+    definition: 'Object declared by the contract with fields: name, listingTypes, submissionPolicy.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdatePublicDirectoryDto
+  - term: CreatePublicJobDto
+    definition: 'Object declared by the contract with fields: jobType, input.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreatePublicJobDto
+  - term: PublicUpdateTermDto
+    definition: 'Object declared by the contract with fields: label, parentTermId, metadata, parentSlug.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/PublicUpdateTermDto
+  - term: CreatePublicListingDto
+    definition: 'Object declared by the contract with fields: listingType, slug, title, status, parentId, parentSlug, parentListingType, relationshipType,
+      geo, canonicalFields, editorialFields, publishAt. (1 more)'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreatePublicListingDto
+  - term: BulkUpsertItemDto
+    definition: 'Object declared by the contract with fields: listingType, slug, title, status, geo, canonicalFields, editorialFields, taxonomies,
+      attributes, parentId, publishAt.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/BulkUpsertItemDto
+  - term: BulkUpsertListingsDto
+    definition: 'Object declared by the contract with fields: items, atomic.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/BulkUpsertListingsDto
+  - term: BatchListingItem
+    definition: 'Object declared by the contract with fields: listingType, slug.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/BatchListingItem
+  - term: BatchListingsDto
+    definition: 'Object declared by the contract with fields: items.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/BatchListingsDto
+  - term: UpdatePublicListingDto
+    definition: 'Object declared by the contract with fields: title, status, parentId, parentSlug, parentListingType, relationshipType, geo, canonicalFields,
+      editorialFields, publishAt, taxonomies, slug.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdatePublicListingDto
+  - term: SetPublicAttributesDto
+    definition: 'Object declared by the contract with fields: attributes.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/SetPublicAttributesDto
+  - term: PublicTermAssignmentDto
+    definition: 'Object declared by the contract with fields: taxonomy, term.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/PublicTermAssignmentDto
+  - term: SetPublicTermsDto
+    definition: 'Object declared by the contract with fields: terms.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/SetPublicTermsDto
+  - term: PatchPublicTermsDto
+    definition: 'Object declared by the contract with fields: add, remove.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/PatchPublicTermsDto
+  - term: CreatePublicSnapshotDto
+    definition: 'Object declared by the contract with fields: source, externalId, payload, fetchedAt.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreatePublicSnapshotDto
+  - term: EnrichListingDto
+    definition: 'Object declared by the contract with fields: type, direction, force, externalId.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/EnrichListingDto
+  - term: SweepProbesDto
+    definition: 'Object declared by the contract with fields: kind, limit, force.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/SweepProbesDto
+  - term: SweepScreenshotsDto
+    definition: 'Object declared by the contract with fields: limit, force, width, height, listingSlugs.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/SweepScreenshotsDto
+  - term: SweepResearchDto
+    definition: 'Object declared by the contract with fields: limit, force, staleAfterDays, sources, declareFields, ingestOg, listingSlugs.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/SweepResearchDto
+  - term: ApplyScreeningDto
+    definition: 'Object declared by the contract with fields: dryRun, hold, limit.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/ApplyScreeningDto
+  - term: CreatePublicMediaDto
+    definition: 'Object declared by the contract with fields: url, source, alt, caption, role, sortOrder.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreatePublicMediaDto
+  - term: UpdatePublicMediaDto
+    definition: 'Object declared by the contract with fields: alt, caption, role, sortOrder.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdatePublicMediaDto
+  - term: CreateMediaAssetDto
+    definition: 'Object declared by the contract with fields: source, sourceRef, variants.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateMediaAssetDto
+  - term: UpdateMediaAssetDto
+    definition: 'Object declared by the contract with fields: cdnUrl, variants, status, alt, caption, role, sortOrder.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdateMediaAssetDto
+  - term: CreateSourceSnapshotDto
+    definition: 'Object declared by the contract with fields: source, externalId, payload, fetchedAt.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateSourceSnapshotDto
+  - term: CreateDomainDto
+    definition: 'Object declared by the contract with fields: domain, isPrimary.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateDomainDto
+  - term: RejectReviewDto
+    definition: 'Object declared by the contract with fields: spam.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/RejectReviewDto
+  - term: CreateCommentDto
+    definition: 'Object declared by the contract with fields: path, authorName, body, email, turnstileToken, website2.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateCommentDto
+  - term: RejectCommentDto
+    definition: 'Object declared by the contract with fields: spam.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/RejectCommentDto
+  - term: ReplyToCommentDto
+    definition: 'Object declared by the contract with fields: reply, replyAuthor.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/ReplyToCommentDto
+  - term: UpdateOrderDto
+    definition: 'Object declared by the contract with fields: status, placementUrl, operatorNotes.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/UpdateOrderDto
+  - term: CreateCompedOrderDto
+    definition: 'Object declared by the contract with fields: kind, purchaserEmail, targetUrl, anchorText, brief, operatorNotes.'
+    tags:
+    - Object
+    source: openapi/epicdirectories-openapi.json#/components/schemas/CreateCompedOrderDto

@@ -1,0 +1,241 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories orders (api key) API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: orders (api key)
+paths:
+  /public/v1/directories/{directory}/orders:
+    get:
+      operationId: OrdersAdminController_list
+      summary: List the content-order queue
+      description: 'Requires the `payments` scope. Rows newest first, each with the payment that bought it, plus `countsByStatus` across the directory and `openCount` — the number still awaiting work.
+
+
+        `status=open` is a filter alias for `received` or `in_progress` — no row holds that value; it is the answer to "what needs work", which spans two stored statuses.
+
+
+        A comped order has `payment: null`. That is a deliberate state, not a missing row: comping creates no Payment, so the money table stays reconcilable against Stripe.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: status
+        required: false
+        in: query
+        description: Omit for every status. `open` is a FILTER ALIAS, not a stored value — it means `received` or `in_progress`, which is the answer to "what needs work". It is what the queue page asks for by default, and `openCount` in the response is its size.
+        schema:
+          enum:
+          - open
+          - received
+          - in_progress
+          - delivered
+          - cancelled
+          - refunded
+          type: string
+      - name: kind
+        required: false
+        in: query
+        schema:
+          enum:
+          - guest_post
+          - niche_edit
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Default 50, max 200
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Paginated orders, counts by status, and openCount
+        '401':
+          description: Missing or invalid X-API-Key
+        '403':
+          description: Key lacks the `payments` scope
+        '404':
+          description: Directory not found or out of key scope
+      tags:
+      - orders (api key)
+      security:
+      - apiKey: []
+    post:
+      operationId: OrdersAdminController_createComped
+      summary: Record a comped order — work promised without a payment
+      description: 'Requires **both** `payments` and `write`. Creates **no Payment row**, deliberately: the payment table is what reconciles against Stripe, and a fake row written to make the queue look right is how that stops being true. The order''s `paymentId` stays null.
+
+
+        Every field but `kind` is optional, because a comp has no Stripe Checkout to collect them.
+
+
+        Fires `order.received`, with the same keys a paid order sends and nulls where the payment would have been.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCompedOrderDto'
+      responses:
+        '201':
+          description: The created order
+        '400':
+          description: kind was not guest_post or niche_edit
+        '403':
+          description: Key lacks `payments` or `write`
+        '404':
+          description: Directory not found or out of key scope
+      tags:
+      - orders (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/orders/{orderId}:
+    get:
+      operationId: OrdersAdminController_get
+      summary: Get one content order
+      description: 'Requires the `payments` scope. Includes the buyer''s brief and their email address, neither of which is ever exposed publicly.
+
+
+        Every buyer-supplied field is untrusted text — it is whatever was typed into a Stripe custom field. `targetUrl` rendered straight into an `href` turns a purchase into a stored redirect.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: orderId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The order
+        '403':
+          description: Key lacks the `payments` scope
+        '404':
+          description: Order not found in this directory
+      tags:
+      - orders (api key)
+      security:
+      - apiKey: []
+    patch:
+      operationId: OrdersAdminController_update
+      summary: Advance an order, record where it was published, or leave a note
+      description: 'Requires **both** `payments` and `write`.
+
+
+        Send any of `status`, `placementUrl`, `operatorNotes`. An empty body is a 400 rather than a no-op.
+
+
+        **`delivered` requires a `placementUrl`**, already stored or sent in the same request, and the rule is checked against the resulting state — so clearing the URL of a delivered order is refused too. Nothing fetches that URL to verify it: `delivered` is your claim, and the API takes your word for it.
+
+
+        **`refunded` cannot be set by hand, and an order already refunded answers 409 to any status change.** A refund is Stripe''s fact and arrives over the signed webhook.
+
+
+        Reaching `delivered` for the first time fires `order.delivered`. Later edits do not re-fire it and do not move `deliveredAt`.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: orderId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderDto'
+      responses:
+        '200':
+          description: The updated order
+        '400':
+          description: Empty body, an unsettable status, a placementUrl that is not an https URL, or `delivered` without one
+        '403':
+          description: Key lacks `payments` or `write`
+        '404':
+          description: Order not found in this directory
+        '409':
+          description: The order was refunded; its status is fixed
+      tags:
+      - orders (api key)
+      security:
+      - apiKey: []
+components:
+  schemas:
+    UpdateOrderDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - received
+          - in_progress
+          - delivered
+          - cancelled
+          description: '`refunded` is deliberately not accepted. A refund is Stripe''s fact and arrives over the signed webhook, which sets it; a status typed here could claim money went back when it did not. An order already refunded answers 409 to any status change.'
+        placementUrl:
+          type: string
+          description: Where it was published. **Required in order to reach `delivered`** — it is the only field that lets anyone but the operator confirm the buyer got what they paid for. Send an empty string to clear it, which is refused while the order is delivered.
+        operatorNotes:
+          type: string
+          description: Operator-only. Never rendered publicly. Empty string clears it.
+    CreateCompedOrderDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+          - guest_post
+          - niche_edit
+        purchaserEmail:
+          type: string
+          description: 'Who the work is discussed with. Not validated as an email: this is a note to the operator, and nothing sends mail to it — there is no email infrastructure in this system.'
+        targetUrl:
+          type: string
+          description: Link destination the post should point at.
+        anchorText:
+          type: string
+        brief:
+          type: string
+          description: Topic, a link to a draft, or instructions.
+        operatorNotes:
+          type: string
+          description: Why it was comped, ideally.
+      required:
+      - kind
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

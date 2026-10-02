@@ -1,0 +1,171 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories API Keys API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: API Keys
+paths:
+  /v1/api-keys:
+    post:
+      operationId: ApiKeysController_create
+      summary: Create a new API key
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKeyDto'
+      responses:
+        '201':
+          description: API key created. The full key is only returned once!
+      tags:
+      - API Keys
+      security:
+      - bearer: []
+    get:
+      operationId: ApiKeysController_findAll
+      summary: List API keys for the account
+      parameters:
+      - name: directoryId
+        required: false
+        in: query
+        description: Filter to keys scoped to this directory. Use the literal string "null" to return only account-wide keys (directoryId IS NULL). Omit to return all keys.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of API keys (without full key value)
+      tags:
+      - API Keys
+      security:
+      - bearer: []
+  /v1/api-keys/{keyId}:
+    get:
+      operationId: ApiKeysController_findOne
+      summary: Get API key details
+      parameters:
+      - name: keyId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: API key details (without full key value)
+        '404':
+          description: API key not found
+      tags:
+      - API Keys
+      security:
+      - bearer: []
+    patch:
+      operationId: ApiKeysController_update
+      summary: Update an API key
+      parameters:
+      - name: keyId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateApiKeyDto'
+      responses:
+        '200':
+          description: API key updated
+        '404':
+          description: API key not found
+      tags:
+      - API Keys
+      security:
+      - bearer: []
+    delete:
+      operationId: ApiKeysController_remove
+      summary: Revoke/delete an API key
+      parameters:
+      - name: keyId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: API key deleted
+        '404':
+          description: API key not found
+      tags:
+      - API Keys
+      security:
+      - bearer: []
+components:
+  schemas:
+    CreateApiKeyDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name for the API key
+          example: Hermes — ConventionGrid
+        directoryId:
+          type: string
+          description: Restrict the key to a single directory. Accepts either the directory UUID or its slug. Omit for an account-wide key.
+        scopes:
+          type: array
+          description: 'Scopes granted to this key. Required — pass `[]` for a read-only key (published listings only). Known scopes: `write` (allow POST/PATCH/PUT/DELETE on listings, attributes, terms, snapshots, webhooks); `read:drafts` (allow read endpoints to surface non-published listings — drafts and hidden); `submissions` (read/action the anonymous submission queue); `reviews` (read/moderate the public review and page-comment queues — approving, and replying to a comment, also need `write`).'
+          example:
+          - write
+          items:
+            type: string
+            enum:
+            - write
+            - read:drafts
+            - submissions
+            - reviews
+            - payments
+        expiresAt:
+          type: string
+          description: Expiration date (ISO 8601)
+          example: '2025-12-31T23:59:59Z'
+      required:
+      - name
+      - scopes
+    UpdateApiKeyDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Updated name for the API key
+        scopes:
+          type: array
+          description: Updated scopes. Omit to leave unchanged; `[]` makes the key read-only (published listings only).
+          items:
+            type: string
+            enum:
+            - write
+            - read:drafts
+            - submissions
+            - reviews
+            - payments
+        expiresAt:
+          type: string
+          description: Updated expiration date
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

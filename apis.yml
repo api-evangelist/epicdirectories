@@ -1,30 +1,761 @@
 aid: epicdirectories
 name: EpicDirectories
-description: 'EpicDirectories is a company surfaced via the API Evangelist harvest backlog (source: new-submission)
-  and added to the network as a stub for full-pipeline profiling.'
+image: https://epicdirectories.com/og-default.png
+description: EpicDirectories provides a curated catalog of 165 directories, databases, and searchable archives across various categories such
+  as entertainment, SaaS, business, education, and more. The platform helps users discover valuable resources for research, development, and market
+  insights, offering categorized listings with screenshots and detailed information to streamline the search for relevant directories and data
+  sources.
 url: https://raw.githubusercontent.com/api-evangelist/epicdirectories/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:new-submission
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-10-02 (modular-v1; was harvest)
 specificationVersion: '0.20'
 created: '2026-10-02'
 modified: '2026-10-02'
 tags:
 - Company
-apis: []
+- Directory
+- API
+- Data
+- Catalog
+- Search
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: AgenticAccess
+  url: agentic-access/epicdirectories-agentic-access.yml
+- type: Spectral
+  url: rules/epicdirectories-rules.yml
+- type: JSONLD
+  url: json-ld/epicdirectories-context.jsonld
+- type: Vocabulary
+  url: vocabulary/epicdirectories-vocabulary.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: DataModel
+  url: data-model/epicdirectories-data-model.yml
+- type: Idempotency
+  url: conventions/epicdirectories-conventions.yml
+- type: Conventions
+  url: conventions/epicdirectories-conventions.yml
+- type: ErrorCatalog
+  url: errors/epicdirectories-problem-types.yml
+- type: Conformance
+  url: conformance/epicdirectories-conformance.yml
+- type: Hosts
+  url: hosts/epicdirectories-hosts.yml
+- type: Vendors
+  url: vendors/epicdirectories-vendors.yml
+- type: PrivacyPolicy
+  url: https://epicdirectories.com/directory/privacy-guides/
+- type: Newsroom
+  url: https://epicdirectories.com/press/
+- type: Authentication
+  url: authentication/epicdirectories-authentication.yml
+- type: DomainSecurity
+  url: security/epicdirectories-domain-security.yml
 - type: Website
   url: https://epicdirectories.com
 - type: Documentation
   url: https://api.epicdirectories.com/docs
-x-submission-notes: 'Directory infrastructure API: listings, taxonomies, media, imports, submissions,
-  enrichment.'
-x-submission-probe: root 200; Swagger UI 200; OpenAPI 3.0.0 134 paths (servers api.epicdirectories.com
-  + localhost); 404 probe 404
+- type: DeveloperPortal
+  url: https://epicdirectories.com/developers/
+apis:
+- aid: epicdirectories:epicdirectories-api-keys-api
+  name: EpicDirectories API Keys API
+  description: The api-keys API from EpicDirectories — 2 operation(s) for api-keys.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - api-keys
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-api-keys-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-attribute-templates-api
+  name: EpicDirectories Attribute Templates API
+  description: >-
+    The attribute-templates API from EpicDirectories — 2 operation(s) for attribute-templates.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - attribute-templates
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-attribute-templates-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-auth-api
+  name: EpicDirectories Auth API
+  description: The auth API from EpicDirectories — 1 operation(s) for auth.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - auth
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-auth-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-comments-admin-api
+  name: EpicDirectories comments (admin) API
+  description: The comments (admin) API from EpicDirectories — 5 operation(s) for comments (admin).
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - comments (admin)
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-comments-admin-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-comments-api-key-api
+  name: EpicDirectories comments (api key) API
+  description: The comments (api key) API from EpicDirectories — 6 operation(s) for comments (api key).
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - comments (api key)
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-comments-api-key-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-comments-api
+  name: EpicDirectories Comments API
+  description: The comments API from EpicDirectories — 1 operation(s) for comments.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - comments
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-comments-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-directories-api
+  name: EpicDirectories Directories API
+  description: The directories API from EpicDirectories — 6 operation(s) for directories.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - directories
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-directories-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-domains-api
+  name: EpicDirectories Domains API
+  description: The domains API from EpicDirectories — 4 operation(s) for domains.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - domains
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-domains-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-health-api
+  name: EpicDirectories Health API
+  description: The health API from EpicDirectories — 2 operation(s) for health.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - health
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-health-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-jobs-api
+  name: EpicDirectories Jobs API
+  description: The jobs API from EpicDirectories — 4 operation(s) for jobs.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - jobs
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-jobs-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-listing-attributes-api
+  name: EpicDirectories Listing Attributes API
+  description: The listing-attributes API from EpicDirectories — 4 operation(s) for listing-attributes.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - listing-attributes
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-listing-attributes-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-listings-api
+  name: EpicDirectories Listings API
+  description: The listings API from EpicDirectories — 2 operation(s) for listings.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - listings
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-listings-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-media-assets-api
+  name: EpicDirectories Media Assets API
+  description: The media-assets API from EpicDirectories — 4 operation(s) for media-assets.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - media-assets
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-media-assets-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-orders-admin-api
+  name: EpicDirectories orders (admin) API
+  description: The orders (admin) API from EpicDirectories — 2 operation(s) for orders (admin).
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - orders (admin)
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-orders-admin-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-orders-api-key-api
+  name: EpicDirectories orders (api key) API
+  description: The orders (api key) API from EpicDirectories — 2 operation(s) for orders (api key).
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - orders (api key)
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-orders-api-key-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-payments-admin-api
+  name: EpicDirectories payments (admin) API
+  description: The payments (admin) API from EpicDirectories — 2 operation(s) for payments (admin).
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - payments (admin)
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-payments-admin-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-payments-api-key-api
+  name: EpicDirectories payments (api key) API
+  description: The payments (api key) API from EpicDirectories — 2 operation(s) for payments (api key).
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - payments (api key)
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-payments-api-key-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-payments-api
+  name: EpicDirectories Payments API
+  description: The payments API from EpicDirectories — 3 operation(s) for payments.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - payments
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-payments-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-public-api
+  name: EpicDirectories Public API
+  description: The public API from EpicDirectories — 46 operation(s) for public.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - public
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-public-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-recipes-api
+  name: EpicDirectories Recipes API
+  description: The recipes API from EpicDirectories — 3 operation(s) for recipes.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - recipes
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-recipes-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-reviews-admin-api
+  name: EpicDirectories reviews (admin) API
+  description: The reviews (admin) API from EpicDirectories — 4 operation(s) for reviews (admin).
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - reviews (admin)
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-reviews-admin-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-reviews-api-key-api
+  name: EpicDirectories reviews (api key) API
+  description: The reviews (api key) API from EpicDirectories — 5 operation(s) for reviews (api key).
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - reviews (api key)
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-reviews-api-key-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-reviews-api
+  name: EpicDirectories Reviews API
+  description: The reviews API from EpicDirectories — 1 operation(s) for reviews.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - reviews
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-reviews-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-screening-api
+  name: EpicDirectories Screening API
+  description: The screening API from EpicDirectories — 2 operation(s) for screening.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - screening
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-screening-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-site-probes-api
+  name: EpicDirectories site probes API
+  description: The site probes API from EpicDirectories — 2 operation(s) for site probes.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - site probes
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-site-probes-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-source-snapshots-api
+  name: EpicDirectories Source Snapshots API
+  description: The source-snapshots API from EpicDirectories — 3 operation(s) for source-snapshots.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - source-snapshots
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-source-snapshots-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-submissions-admin-api
+  name: EpicDirectories submissions (admin) API
+  description: >-
+    The submissions (admin) API from EpicDirectories — 4 operation(s) for submissions (admin).
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - submissions (admin)
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-submissions-admin-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-submissions-api-key-api
+  name: EpicDirectories submissions (api key) API
+  description: >-
+    The submissions (api key) API from EpicDirectories — 4 operation(s) for submissions (api key).
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - submissions (api key)
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-submissions-api-key-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-submissions-api
+  name: EpicDirectories Submissions API
+  description: The submissions API from EpicDirectories — 2 operation(s) for submissions.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - submissions
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-submissions-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-taxonomies-api
+  name: EpicDirectories Taxonomies API
+  description: The taxonomies API from EpicDirectories — 4 operation(s) for taxonomies.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - taxonomies
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-taxonomies-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+- aid: epicdirectories:epicdirectories-webhooks-api
+  name: EpicDirectories Webhooks API
+  description: The webhooks API from EpicDirectories — 3 operation(s) for webhooks.
+  humanURL: https://epicdirectories.com/developers/
+  baseURL: https://api.epicdirectories.com
+  tags:
+  - webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/epicdirectories-webhooks-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-webhook-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-sweep-research-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-public-listing-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-update-directory-dto-schema.json
+  - type: JSONSchema
+    url: json-schema/epicdirectories-create-public-listing-dto-schema.json
+x-submission-notes: 'Directory infrastructure API: listings, taxonomies, media, imports, submissions, enrichment.'
+x-submission-probe: root 200; Swagger UI 200; OpenAPI 3.0.0 134 paths (servers api.epicdirectories.com + localhost); 404 probe 404
 x-submitted-by: ds@epicdirectories.com (apis.io/add, 2026-10-01)
+x-enrichment:
+  date: '2026-10-02'
+  status: enriched
+  artifacts_added: 24
+  pass: modular-v1
+  engine: identity=local,contract=local,surfaces=local,docs=local,regulatory=local

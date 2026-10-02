@@ -1,0 +1,363 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Taxonomies API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: Taxonomies
+paths:
+  /v1/directories/{directoryId}/taxonomies:
+    post:
+      operationId: TaxonomiesController_createTaxonomy
+      summary: Create a new taxonomy
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaxonomyDto'
+      responses:
+        '201':
+          description: Taxonomy created successfully
+        '400':
+          description: Invalid taxonomy payload
+        '404':
+          description: Directory not found
+        '409':
+          description: Taxonomy slug already exists in this directory
+      tags:
+      - Taxonomies
+      security:
+      - bearer: []
+    get:
+      operationId: TaxonomiesController_findAllTaxonomies
+      summary: List all taxonomies
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Taxonomies for this directory
+        '404':
+          description: Directory not found
+      tags:
+      - Taxonomies
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/taxonomies/{taxonomyId}:
+    get:
+      operationId: TaxonomiesController_findOneTaxonomy
+      summary: Get taxonomy with terms
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: taxonomyId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Taxonomy with embedded terms
+        '404':
+          description: Taxonomy or directory not found
+      tags:
+      - Taxonomies
+      security:
+      - bearer: []
+    patch:
+      operationId: TaxonomiesController_updateTaxonomy
+      summary: Update a taxonomy
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: taxonomyId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaxonomyDto'
+      responses:
+        '200':
+          description: Taxonomy updated
+        '404':
+          description: Taxonomy or directory not found
+        '409':
+          description: Taxonomy slug conflict
+      tags:
+      - Taxonomies
+      security:
+      - bearer: []
+    delete:
+      operationId: TaxonomiesController_removeTaxonomy
+      summary: Delete a taxonomy
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: taxonomyId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Taxonomy deleted (cascades to terms)
+        '404':
+          description: Taxonomy or directory not found
+      tags:
+      - Taxonomies
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/taxonomies/{taxonomyId}/terms:
+    post:
+      operationId: TaxonomiesController_createTerm
+      summary: Create a new term
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: taxonomyId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTermDto'
+      responses:
+        '201':
+          description: Term created
+        '400':
+          description: Invalid term payload
+        '404':
+          description: Taxonomy or parent term not found
+        '409':
+          description: Term slug already exists in this taxonomy
+      tags:
+      - Taxonomies
+      security:
+      - bearer: []
+    get:
+      operationId: TaxonomiesController_findAllTerms
+      summary: List all terms
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: taxonomyId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: flat
+        required: false
+        in: query
+        description: Return flat list instead of tree
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Terms (tree by default; flat=true returns array)
+        '404':
+          description: Taxonomy or directory not found
+      tags:
+      - Taxonomies
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/taxonomies/{taxonomyId}/terms/{termId}:
+    get:
+      operationId: TaxonomiesController_findOneTerm
+      summary: Get term details
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: taxonomyId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: termId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Term with metadata + children
+        '404':
+          description: Term, taxonomy, or directory not found
+      tags:
+      - Taxonomies
+      security:
+      - bearer: []
+    patch:
+      operationId: TaxonomiesController_updateTerm
+      summary: Update a term
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: taxonomyId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: termId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTermDto'
+      responses:
+        '200':
+          description: Term updated
+        '404':
+          description: Term, taxonomy, or directory not found
+        '409':
+          description: Slug conflict or invalid parent reference
+      tags:
+      - Taxonomies
+      security:
+      - bearer: []
+    delete:
+      operationId: TaxonomiesController_removeTerm
+      summary: Delete a term
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: taxonomyId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: termId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Term deleted
+        '404':
+          description: Term, taxonomy, or directory not found
+        '409':
+          description: Term has children (delete or reparent them first), or listings are still assigned to it (body carries `listingCount`; reassign them first). There is no force flag — see TaxonomiesService.removeTerm for why.
+      tags:
+      - Taxonomies
+      security:
+      - bearer: []
+components:
+  schemas:
+    CreateTermDto:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: URL-friendly slug
+        label:
+          type: string
+          description: Display label
+        parentTermId:
+          type: string
+          description: Parent term ID for hierarchical taxonomies
+        metadata:
+          type: object
+          description: 'Free-form metadata: synonyms, seoKeywords, relatedTopics, featured, order, description, etc. Used by the industry-slop normalization workflow.'
+      required:
+      - slug
+      - label
+    UpdateTermDto:
+      type: object
+      properties:
+        label:
+          type: string
+          description: Display label. Does NOT change the slug — the term is still addressed by its original slug.
+        parentTermId:
+          type: object
+          description: Parent term ID for hierarchical taxonomies
+        metadata:
+          type: object
+          description: 'Free-form metadata. Conventional keys: synonyms, seoKeywords, relatedTopics, description, seoTitle, seoDescription, featured, order. **Full-replace on PATCH** — sending `{ metadata: { synonyms: [...] } }` wipes seoKeywords and every other key. Read-modify-write when partially updating: GET the term, spread its metadata, add your fields, send the merged object back.'
+    UpdateTaxonomyDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Display name of the taxonomy
+    CreateTaxonomyDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Display name of the taxonomy
+        slug:
+          type: string
+          description: URL-friendly slug
+        structure:
+          type: string
+          description: Taxonomy structure type
+          enum:
+          - flat
+          - hierarchical
+          default: flat
+      required:
+      - name
+      - slug
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

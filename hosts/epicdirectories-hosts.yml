@@ -1,0 +1,53 @@
+generated: '2026-10-02'
+method: derived
+source: the pre-flight dossier, apis.yml pointers, spec servers, well-known, vendors -- nothing fetched here
+generator: derive-hosts.py
+summary:
+  hosts: 2
+  own: 2
+  other_domain: 0
+  platform: 0
+  roles:
+  - docs
+  - website
+hosts:
+- host: api.epicdirectories.com
+  found_by:
+  - pointer
+  - apis[]
+  - probed
+  - site-links
+  - docs-index
+  - spec-found
+  - contract-discovery
+  - well-known
+  types:
+  - Documentation
+  serves:
+  - api
+  - docs
+  - spec
+  registrable_domain: epicdirectories.com
+  role: docs
+  relation: own
+- host: epicdirectories.com
+  found_by:
+  - pointer
+  - apis[]
+  - probed
+  - docs-index
+  - contract-discovery
+  - well-known
+  - vendor-detect
+  types:
+  - PrivacyPolicy
+  - Newsroom
+  - Website
+  - DeveloperPortal
+  serves:
+  - docs
+  - cdn
+  vendor: cloudflare
+  registrable_domain: epicdirectories.com
+  role: website
+  relation: own

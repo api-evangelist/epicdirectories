@@ -1,0 +1,195 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Jobs API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: Jobs
+paths:
+  /v1/directories/{directoryId}/jobs:
+    post:
+      operationId: JobsController_create
+      summary: Create and queue a new job
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJobDto'
+      responses:
+        '201':
+          description: Job created and queued
+        '400':
+          description: Invalid job payload
+        '404':
+          description: Directory not found
+      tags:
+      - Jobs
+      security:
+      - bearer: []
+    get:
+      operationId: JobsController_findAll
+      summary: List jobs for directory
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: jobType
+        required: false
+        in: query
+        description: Filter by job type
+        schema:
+          enum:
+          - import
+          - media_process
+          - recipe_build
+          - recipe_rebuild_all
+          - enrichment
+          type: string
+      - name: status
+        required: false
+        in: query
+        description: Filter by status
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Page number
+        schema:
+          default: 1
+          type: number
+      - name: limit
+        required: false
+        in: query
+        description: Items per page
+        schema:
+          default: 50
+          type: number
+      responses:
+        '200':
+          description: Paginated list of jobs
+        '404':
+          description: Directory not found
+      tags:
+      - Jobs
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/jobs/{jobId}:
+    get:
+      operationId: JobsController_findOne
+      summary: Get job details with queue status
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: jobId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Job details with BullMQ queue state
+        '404':
+          description: Job or directory not found
+      tags:
+      - Jobs
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/jobs/{jobId}/cancel:
+    post:
+      operationId: JobsController_cancel
+      summary: Cancel a pending/queued job
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: jobId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Job cancelled
+        '400':
+          description: Job is in a state that cannot be cancelled
+        '404':
+          description: Job or directory not found
+      tags:
+      - Jobs
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/jobs/{jobId}/retry:
+    post:
+      operationId: JobsController_retry
+      summary: Retry a failed job
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: jobId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Job re-queued
+        '400':
+          description: Job is not in a retriable state
+        '404':
+          description: Job or directory not found
+      tags:
+      - Jobs
+      security:
+      - bearer: []
+components:
+  schemas:
+    CreateJobDto:
+      type: object
+      properties:
+        jobType:
+          type: string
+          description: Type of job
+          enum:
+          - import
+          - media_process
+          - recipe_build
+          - recipe_rebuild_all
+          - enrichment
+        input:
+          type: object
+          description: Job input configuration
+      required:
+      - jobType
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

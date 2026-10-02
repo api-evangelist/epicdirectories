@@ -1,0 +1,247 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Recipes API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: recipes
+paths:
+  /v1/directories/{directoryId}/recipes:
+    post:
+      operationId: RecipesController_create
+      summary: Create a new recipe
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRecipeDto'
+      responses:
+        '201':
+          description: Recipe created successfully
+        '409':
+          description: Recipe slug already exists
+      tags:
+      - recipes
+      security:
+      - bearer: []
+    get:
+      operationId: RecipesController_findAll
+      summary: List recipes for directory
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: recipeType
+        required: false
+        in: query
+        description: Filter by recipe type
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of recipes
+      tags:
+      - recipes
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/recipes/{recipeId}:
+    get:
+      operationId: RecipesController_findOne
+      summary: Get recipe details
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: recipeId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Recipe details
+        '404':
+          description: Recipe not found
+      tags:
+      - recipes
+      security:
+      - bearer: []
+    patch:
+      operationId: RecipesController_update
+      summary: Update a recipe
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: recipeId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRecipeDto'
+      responses:
+        '200':
+          description: Recipe updated successfully
+        '404':
+          description: Recipe not found
+      tags:
+      - recipes
+      security:
+      - bearer: []
+    delete:
+      operationId: RecipesController_remove
+      summary: Delete a recipe
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: recipeId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Recipe deleted successfully
+        '404':
+          description: Recipe not found
+      tags:
+      - recipes
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/recipes/{recipeId}/preview:
+    get:
+      operationId: RecipesController_preview
+      summary: Preview recipe results without persisting
+      description: Runs the recipe against the current data and returns matching listings. Same shape as the public executeRecipe endpoint; useful for the admin "test" button to validate scope/ranking changes before saving.
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: recipeId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Recipe preview with matching listings
+        '404':
+          description: Recipe not found
+      tags:
+      - recipes
+      security:
+      - bearer: []
+components:
+  schemas:
+    UpdateRecipeDto:
+      type: object
+      properties:
+        recipeType:
+          type: string
+          description: Recipe type (e.g., collection, landing, feed)
+        slug:
+          type: string
+          description: URL-friendly slug
+          example: top-restaurants-nyc
+        scope:
+          type: object
+          description: Scope definition - filters for which listings to include
+          example:
+            listingType: restaurant
+            taxonomyTerms:
+            - cuisine:italian
+        constraints:
+          type: object
+          description: Constraints for the recipe (e.g., limit, geo bounds)
+          example:
+            limit: 50
+            radius: 10mi
+        ranking:
+          type: object
+          description: Ranking/sorting configuration
+          example:
+            sortBy: rating
+            order: desc
+        seo:
+          type: object
+          description: SEO metadata for the recipe output
+          example:
+            title: Top Italian Restaurants in NYC
+            metaDescription: '...'
+    CreateRecipeDto:
+      type: object
+      properties:
+        recipeType:
+          type: string
+          description: Recipe type (e.g., collection, landing, feed)
+        slug:
+          type: string
+          description: URL-friendly slug
+          example: top-restaurants-nyc
+        scope:
+          type: object
+          description: Scope definition - filters for which listings to include
+          example:
+            listingType: restaurant
+            taxonomyTerms:
+            - cuisine:italian
+        constraints:
+          type: object
+          description: Constraints for the recipe (e.g., limit, geo bounds)
+          example:
+            limit: 50
+            radius: 10mi
+        ranking:
+          type: object
+          description: Ranking/sorting configuration
+          example:
+            sortBy: rating
+            order: desc
+        seo:
+          type: object
+          description: SEO metadata for the recipe output
+          example:
+            title: Top Italian Restaurants in NYC
+            metaDescription: '...'
+      required:
+      - recipeType
+      - slug
+      - scope
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

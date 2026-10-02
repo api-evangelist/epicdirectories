@@ -1,0 +1,131 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories payments (admin) API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: payments (admin)
+paths:
+  /v1/directories/{directoryId}/payments:
+    get:
+      operationId: PaymentsOperatorController_list
+      summary: List payments for a directory
+      description: 'Rows newest first, plus `countsByStatus` and `paidTotalCents`.
+
+
+        `paidTotalCents` counts **only** rows in `paid`. Pending rows are unfinished checkouts and refunded ones have left again, so including either would produce a revenue number that disagrees with Stripe.'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        schema: {}
+      - name: limit
+        required: false
+        in: query
+        description: Default 50, max 200
+        schema: {}
+      - name: status
+        required: false
+        in: query
+        schema:
+          enum:
+          - pending
+          - paid
+          - expired
+          - refunded
+          type: string
+      responses:
+        '200':
+          description: Paginated payments, counts and paid total
+        '404':
+          description: Directory not found or not yours
+      tags:
+      - payments (admin)
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/payments/featured/{listingType}/{listingSlug}:
+    post:
+      operationId: PaymentsOperatorController_grant
+      summary: Grant a premium boost without a payment
+      description: 'The comp path — a launch partner, an apology, a correction.
+
+
+        Creates no Payment row, deliberately: the payment table is what reconciles against Stripe, and writing a fake row to produce the state you want is how that stops being true.
+
+
+        Idempotent, and it does not move `featuredAt` on a listing that already has one — the date a listing first became premium is not something a re-grant should rewrite. Reaches drafts too, since an operator may legitimately prepare an unpublished listing.'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingType
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingSlug
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Featured (or already was — see `changed`)
+        '404':
+          description: Directory or listing not found
+      tags:
+      - payments (admin)
+      security:
+      - bearer: []
+    delete:
+      operationId: PaymentsOperatorController_revoke
+      summary: Revoke a premium boost
+      description: Does not refund anything and does not touch the Payment row — a refund happens in Stripe and comes back through the webhook, which revokes the boost on its own. Use this for a boost that was granted by hand, or where the refund has already been handled.
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingType
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingSlug
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Revoked (or already was — see `changed`)
+        '404':
+          description: Directory or listing not found
+      tags:
+      - payments (admin)
+      security:
+      - bearer: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

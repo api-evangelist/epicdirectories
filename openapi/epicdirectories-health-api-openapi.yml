@@ -1,0 +1,57 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Health API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: Health
+paths:
+  /v1/health:
+    get:
+      operationId: HealthController_check
+      summary: Health check (liveness) — always 200 while the process is up
+      description: 'Render polls this, so it deliberately **does not** fail on a broken dependency: the API serves reads perfectly well with Redis down, and returning non-200 would get the service restarted, turning a queue outage into a total one.
+
+
+        Read `status` (`ok` | `degraded`) and `alerts[]` instead of the HTTP code. `alerts` names any queue carrying failed jobs — the signal that was missing when every media job failed silently for months behind a green check.
+
+
+        For something that pages, use `/v1/health/ready`, which 503s when a dependency is down.'
+      parameters: []
+      responses:
+        '200':
+          description: Process is up; body reports dependency status
+      tags:
+      - Health
+  /v1/health/ready:
+    get:
+      operationId: HealthController_ready
+      summary: Readiness — 503 when a dependency is down
+      description: 'Same probes as `/v1/health`, but the HTTP status reflects them, so an uptime monitor can alert without parsing the body. **Do not point a platform health check at this** — a suspended Redis would restart-loop the API for no benefit.
+
+
+        Failed *jobs* do not 503: those are a data or upstream problem, not a reason to declare the service unfit. They appear in `alerts[]`.'
+      parameters: []
+      responses:
+        '200':
+          description: All dependencies reachable
+        '503':
+          description: Database or Redis unreachable; body lists what
+      tags:
+      - Health
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

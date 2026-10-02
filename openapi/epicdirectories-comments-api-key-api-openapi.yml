@@ -1,0 +1,280 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories comments (api key) API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: comments (api key)
+paths:
+  /public/v1/directories/{directory}/comments:
+    get:
+      operationId: CommentsReadController_list
+      summary: Approved comments, for one page or the whole directory
+      description: 'Any valid key — no scope required, since these are published content.
+
+
+        Returns **approved comments only**; there is no parameter that can surface pending, rejected or spam rows. Each row carries exactly `id`, `path`, `authorName`, `body`, `createdAt`, `reply`, `replyAuthor` and `repliedAt`. Submitter email and abuse metadata are never exposed here. There is no rating.
+
+
+        Pass `path` for one page (normalised exactly as on write, so `/Herbs/Ginger?x=1` finds `/herbs/ginger/`). **Omit it to get every approved comment in the directory** — what a static build should do: page through once with `limit=200` and group by `path`.
+
+
+        Ordered oldest first (`createdAt`, then `id`) — conversation order.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: path
+        required: false
+        in: query
+        description: One page, e.g. `/herbs/ginger/`
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Default 50, max 200
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: '`{ data, pagination: { total, limit, offset, hasMore } }`'
+        '400':
+          description: '`path` is not an acceptable page path'
+        '401':
+          description: Missing or invalid X-API-Key
+        '404':
+          description: Directory not found or out of key scope
+      tags:
+      - comments (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/comment-queue:
+    get:
+      operationId: CommentsModerationController_list
+      summary: List the comment queue
+      description: 'Requires the `reviews` scope (which covers comments). Defaults to `status=pending`; pass `path` to narrow to one page. Also returns `countsByStatus` across the directory.
+
+
+        Each row carries `sameSourceOnPath`: how many OTHER comments on the same page arrived from the same (hashed) source address. A hint, not a verdict — offices, campuses and mobile carriers put many real people behind one address.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: status
+        required: false
+        in: query
+        description: Defaults to `pending`
+        schema:
+          enum:
+          - pending
+          - approved
+          - rejected
+          - spam
+          type: string
+      - name: path
+        required: false
+        in: query
+        description: Only comments on this page. Normalised exactly as on write.
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Default 50, max 200
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Paginated comments + counts by status
+        '401':
+          description: Missing or invalid X-API-Key
+        '403':
+          description: Key lacks the `reviews` scope
+        '404':
+          description: Directory not found or out of key scope
+      tags:
+      - comments (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/comment-queue/{commentId}:
+    get:
+      operationId: CommentsModerationController_get
+      summary: Get one comment
+      description: Requires the `reviews` scope. Includes the abuse metadata (hashed ip, user agent, turnstile verdict) and the submitter email, none of which is ever exposed publicly.
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: commentId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The comment
+        '403':
+          description: Key lacks the `reviews` scope
+        '404':
+          description: Not found
+      tags:
+      - comments (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/comment-queue/{commentId}/approve:
+    post:
+      operationId: CommentsModerationController_approve
+      summary: Approve a comment — this publishes it
+      description: 'Requires **both** `reviews` and `write`: approving makes a stranger''s text publicly readable, so a read-only triage key can look but not publish. Fires `comment.approved`. Returns 409 if the comment is already approved.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: commentId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Approved and published
+        '403':
+          description: Key lacks `reviews` or `write`
+        '409':
+          description: Already approved
+      tags:
+      - comments (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/comment-queue/{commentId}/reject:
+    post:
+      operationId: CommentsModerationController_reject
+      summary: Reject a comment, or unpublish an approved one
+      description: 'Requires the `reviews` scope only — rejecting creates nothing and is reversible, so it does not need `write`. Pass `{ "spam": true }` to file it as spam instead.
+
+
+        Fires `comment.rejected` ONLY when the comment was approved, since only then does a reader see a change.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: commentId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectCommentDto'
+      responses:
+        '201':
+          description: Rejected
+        '403':
+          description: Key lacks the `reviews` scope
+        '404':
+          description: Not found
+      tags:
+      - comments (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/comment-queue/{commentId}/reply:
+    put:
+      operationId: CommentsModerationController_reply
+      summary: Set or clear the editors' public reply
+      description: 'Requires **both** `reviews` and `write` — a reply on an approved comment is published text.
+
+
+        Body `{ "reply": "…", "replyAuthor": "The editors" }`. `reply` is required; send `null` or `""` to clear it (which also clears `replyAuthor` and `repliedAt`). Sets `repliedAt`.
+
+
+        Fires `comment.updated` ONLY if the comment is currently approved. A reply on a pending comment is invisible until the comment is approved, and `comment.approved` covers it then.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: commentId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReplyToCommentDto'
+      responses:
+        '200':
+          description: The updated comment
+        '403':
+          description: Key lacks `reviews` or `write`
+        '404':
+          description: Not found
+      tags:
+      - comments (api key)
+      security:
+      - apiKey: []
+components:
+  schemas:
+    ReplyToCommentDto:
+      type: object
+      properties:
+        reply:
+          type:
+          - string
+          - 'null'
+          description: The editors' public reply, shown beneath the comment once it is approved. `null` or an empty string clears it.
+          maxLength: 4000
+        replyAuthor:
+          type: string
+          description: Who the reply is from, as readers should see it, e.g. "The editors".
+          maxLength: 80
+      required:
+      - reply
+    RejectCommentDto:
+      type: object
+      properties:
+        spam:
+          type: boolean
+          description: Mark as spam rather than merely rejected, so abuse triage can separate the two.
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

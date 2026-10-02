@@ -1,0 +1,202 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories submissions (api key) API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: submissions (api key)
+paths:
+  /public/v1/directories/{directory}/submissions:
+    get:
+      operationId: SubmissionsReviewController_list
+      summary: List the submission queue
+      description: 'Requires the `submissions` scope. Defaults to `status=pending`. Also returns `countsByStatus` across the directory.
+
+
+        Intended for automated triage: list pending, check each submitted URL, reject the dead and spammy, accept the plausible **as drafts**.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: status
+        required: false
+        in: query
+        description: Defaults to `pending`
+        schema:
+          enum:
+          - pending
+          - accepted
+          - rejected
+          - spam
+          type: string
+      - name: kind
+        required: false
+        in: query
+        schema:
+          enum:
+          - listing_suggestion
+          - feedback
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Default 50, max 200
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Paginated submissions + counts by status
+        '401':
+          description: Missing or invalid X-API-Key
+        '403':
+          description: Key lacks the `submissions` scope
+        '404':
+          description: Directory not found or out of key scope
+      tags:
+      - submissions (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/submissions/{submissionId}:
+    get:
+      operationId: SubmissionsReviewController_get
+      summary: Get one submission
+      description: Requires the `submissions` scope. Includes the abuse metadata (hashed ip, turnstile verdict).
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: submissionId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The submission
+        '403':
+          description: Key lacks the `submissions` scope
+      tags:
+      - submissions (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/submissions/{submissionId}/accept:
+    post:
+      operationId: SubmissionsReviewController_accept
+      summary: Accept a submission
+      description: 'Requires **both** `submissions` and `write` — accepting a suggestion creates a Listing, which is a write. Feedback is simply marked handled.
+
+
+        Created listings default to **draft**; pass `listingStatus` to override. An automated caller should not: publishing unreviewed third-party text is what the queue exists to prevent.
+
+
+        Returns 409 on slug collision (with `existingListingId`) rather than auto-suffixing.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: submissionId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptSubmissionDto'
+      responses:
+        '201':
+          description: Accepted; listing created for suggestions
+        '403':
+          description: Key lacks `submissions` or `write`
+        '409':
+          description: Already accepted, or slug collision
+      tags:
+      - submissions (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/submissions/{submissionId}/reject:
+    post:
+      operationId: SubmissionsReviewController_reject
+      summary: Reject a submission
+      description: 'Requires the `submissions` scope only — rejecting creates nothing, and it is reversible (a status flip; the row is retained), so it does not need `write`. Pass `{ "spam": true }` to file it as spam instead of merely rejected.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: submissionId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectSubmissionDto'
+      responses:
+        '201':
+          description: Rejected
+        '403':
+          description: Key lacks the `submissions` scope
+      tags:
+      - submissions (api key)
+      security:
+      - apiKey: []
+components:
+  schemas:
+    AcceptSubmissionDto:
+      type: object
+      properties:
+        listingType:
+          type: string
+          description: Listing type for the created listing. REQUIRED for `listing_suggestion`; ignored for feedback. Not validated against `Directory.listingTypes` — matching how the rest of the API behaves.
+        slug:
+          type: string
+          description: Slug for the created listing. Defaults to a slugified title. Returns 409 if it collides with an existing listing of the same type — deliberately not auto-suffixed, since a collision usually means the thing is already listed.
+        listingStatus:
+          type: string
+          description: Status for the created listing. Defaults to `draft` — accepting a suggestion should not silently publish a stranger's text. Pass `published` to go live immediately.
+          enum:
+          - draft
+          - published
+          - hidden
+        title:
+          type: string
+          description: Override the title. Defaults to the submitted title — worth setting, since submitter text is unedited.
+    RejectSubmissionDto:
+      type: object
+      properties:
+        spam:
+          type: boolean
+          description: Mark as spam rather than merely rejected, so abuse triage can separate the two.
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

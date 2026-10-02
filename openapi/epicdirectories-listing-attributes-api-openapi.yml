@@ -1,0 +1,223 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Listing Attributes API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: listing-attributes
+paths:
+  /v1/directories/{directoryId}/listings/{listingId}/attributes:
+    get:
+      operationId: ListingAttributesController_getAttributes
+      summary: Get all attribute values for a listing
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Attribute values keyed by template
+        '404':
+          description: Listing or directory not found
+      tags:
+      - listing-attributes
+      security:
+      - bearer: []
+    put:
+      operationId: ListingAttributesController_setAttributes
+      summary: Set attribute values for a listing (bulk upsert)
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetAttributesDto'
+      responses:
+        '200':
+          description: Attributes upserted
+        '400':
+          description: Unknown attribute keys for this listing type
+        '404':
+          description: Listing or directory not found
+      tags:
+      - listing-attributes
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/listings/{listingId}/attributes/{templateId}:
+    delete:
+      operationId: ListingAttributesController_deleteAttribute
+      summary: Delete a specific attribute value
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: templateId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Attribute removed
+        '404':
+          description: Listing, attribute, or directory not found
+      tags:
+      - listing-attributes
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/listings/bulk/attributes:
+    post:
+      operationId: ListingAttributesController_bulkSetAttributes
+      summary: Set attributes on multiple listings at once
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkSetAttributesDto'
+      responses:
+        '201':
+          description: Bulk upsert applied; per-listing results returned
+        '400':
+          description: Unknown attribute keys
+        '404':
+          description: Directory not found
+      tags:
+      - listing-attributes
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/listings/{listingId}/terms:
+    get:
+      operationId: ListingAttributesController_getTerms
+      summary: Get taxonomy terms for a listing
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Assigned terms grouped by taxonomy
+        '404':
+          description: Listing or directory not found
+      tags:
+      - listing-attributes
+      security:
+      - bearer: []
+    put:
+      operationId: ListingAttributesController_setTerms
+      summary: Set taxonomy terms for a listing (replaces existing)
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Term assignments replaced
+        '400':
+          description: Unknown term IDs
+        '404':
+          description: Listing or directory not found
+      tags:
+      - listing-attributes
+      security:
+      - bearer: []
+components:
+  schemas:
+    AttributeValueDto:
+      type: object
+      properties:
+        attributeTemplateId:
+          type: string
+          description: Attribute template ID
+        value:
+          type: object
+          description: Value (type depends on attribute template)
+      required:
+      - attributeTemplateId
+      - value
+    SetAttributesDto:
+      type: object
+      properties:
+        attributes:
+          description: Array of attribute values to set
+          type: array
+          items:
+            $ref: '#/components/schemas/AttributeValueDto'
+      required:
+      - attributes
+    BulkSetAttributesDto:
+      type: object
+      properties:
+        listingIds:
+          description: Listing IDs to update
+          type: array
+          items:
+            type: string
+        attributes:
+          description: Array of attribute values to set on all listings
+          type: array
+          items:
+            $ref: '#/components/schemas/AttributeValueDto'
+      required:
+      - listingIds
+      - attributes
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

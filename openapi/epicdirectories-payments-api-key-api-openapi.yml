@@ -1,0 +1,142 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories payments (api key) API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: payments (api key)
+paths:
+  /public/v1/directories/{directory}/payments:
+    get:
+      operationId: PaymentsAdminController_list
+      summary: List payments for a directory
+      description: 'Requires the `payments` scope. Returns rows newest first, plus `countsByStatus` and `paidTotalCents`.
+
+
+        `paidTotalCents` counts **only** rows in `paid`. Pending rows are unfinished checkouts and refunded ones have left again, so including either would produce a revenue number that disagrees with Stripe.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        schema: {}
+      - name: limit
+        required: false
+        in: query
+        description: Default 50, max 200
+        schema: {}
+      - name: status
+        required: false
+        in: query
+        schema:
+          enum:
+          - pending
+          - paid
+          - expired
+          - refunded
+          type: string
+      responses:
+        '200':
+          description: Paginated payments, counts and paid total
+        '401':
+          description: Missing or invalid X-API-Key
+        '403':
+          description: Key lacks the `payments` scope
+        '404':
+          description: Directory not found or out of key scope
+      tags:
+      - payments (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/listings/{listingType}/{listingSlug}/featured:
+    post:
+      operationId: PaymentsAdminController_grant
+      summary: Grant a premium boost without a payment
+      description: 'Requires **both** `payments` and `write`. The comp path — a launch partner, an apology, a correction.
+
+
+        Creates no Payment row, deliberately: the payment table is what reconciles against Stripe, and writing a fake row to produce the state you want is how that stops being true.
+
+
+        Idempotent, and it does not move `featuredAt` on a listing that already has one — the date a listing first became premium is not something a re-grant should rewrite. Unlike the anonymous checkout route this reaches drafts too, since an operator may legitimately prepare an unpublished listing.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingType
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingSlug
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Featured (or already was — see `changed`)
+        '403':
+          description: Key lacks `payments` or `write`
+        '404':
+          description: Directory or listing not found
+      tags:
+      - payments (api key)
+      security:
+      - apiKey: []
+    delete:
+      operationId: PaymentsAdminController_revoke
+      summary: Revoke a premium boost
+      description: 'Requires **both** `payments` and `write`.
+
+
+        Does not refund anything and does not touch the Payment row — a refund happens in Stripe and comes back through the webhook, which revokes the boost on its own. Use this for a boost that was granted by hand, or where the refund has already been handled.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingType
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingSlug
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Revoked (or already was — see `changed`)
+        '403':
+          description: Key lacks `payments` or `write`
+        '404':
+          description: Directory or listing not found
+      tags:
+      - payments (api key)
+      security:
+      - apiKey: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

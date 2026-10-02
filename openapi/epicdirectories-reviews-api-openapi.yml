@@ -1,0 +1,134 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Reviews API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: Reviews
+paths:
+  /public/v1/directories/{directory}/listings/{listingType}/{listingSlug}/reviews:
+    post:
+      operationId: ReviewsController_create
+      summary: Leave a review on a listing (anonymous)
+      description: 'Unauthenticated. Requires the directory to have opted in via `submissionPolicy.reviews = true`; otherwise 404 — a directory never accepts anonymous writes by default.
+
+
+        Takes `authorName`, `rating` (1-5) and `body`, as JSON or as multipart.
+
+
+        Up to 3 images may be attached as multipart parts named `images`, 5 MB each. Every one is identified by its CONTENT rather than its declared type, then re-encoded to WebP and bounded to 1600px. **Re-encoding discards EXIF**, which is what keeps a reviewer from unintentionally publishing the GPS coordinates in a photo taken at their own home. Images attached to a submission that fails the spam checks are discarded rather than stored.
+
+
+        Nothing submitted here is visible to anyone until a moderator approves it, and approval is what moves the listing''s rating average. The target listing is resolved through the same visibility gate as public reads, so a review on an unpublished listing returns 404 rather than confirming the draft exists.
+
+
+        Send a Cloudflare Turnstile token as `turnstileToken` when Turnstile is configured server-side.
+
+
+        Rate limited to **5 per hour per IP**. Always returns **202 `{ accepted: true }`** for anything that validates — including submissions judged to be spam, which are stored with `status: spam`. Bots get no signal about which check caught them.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingType
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingSlug
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                authorName:
+                  type: string
+                  maxLength: 80
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                body:
+                  type: string
+                  maxLength: 4000
+                email:
+                  type: string
+                  format: email
+                turnstileToken:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  maxItems: 3
+              required:
+              - authorName
+              - rating
+              - body
+          application/json:
+            schema:
+              type: object
+              properties:
+                authorName:
+                  type: string
+                  maxLength: 80
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                body:
+                  type: string
+                  maxLength: 4000
+                email:
+                  type: string
+                  format: email
+                turnstileToken:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  maxItems: 3
+              required:
+              - authorName
+              - rating
+              - body
+      responses:
+        '202':
+          description: Received. Not visible — queued for moderation.
+        '400':
+          description: Validation failed, or an attached file was not a readable JPEG/PNG/WebP. Reachable only after the spam checks have passed, so it reveals nothing about them.
+        '404':
+          description: Directory or listing not found, or reviews not enabled
+        '413':
+          description: An attached file exceeds 5 MB
+        '429':
+          description: Rate limit exceeded
+      tags:
+      - Reviews
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

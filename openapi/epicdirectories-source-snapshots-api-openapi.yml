@@ -1,0 +1,190 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Source Snapshots API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: source-snapshots
+paths:
+  /v1/directories/{directoryId}/listings/{listingId}/snapshots:
+    post:
+      operationId: SourceSnapshotsController_create
+      summary: Create a source snapshot for a listing
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSourceSnapshotDto'
+      responses:
+        '201':
+          description: Snapshot created successfully
+      tags:
+      - source-snapshots
+      security:
+      - bearer: []
+    get:
+      operationId: SourceSnapshotsController_findAll
+      summary: List source snapshots for a listing
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: source
+        required: false
+        in: query
+        description: Filter by source
+        schema:
+          type: string
+      responses:
+        '200':
+          description: List of snapshots
+      tags:
+      - source-snapshots
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/listings/{listingId}/snapshots/latest/{source}:
+    get:
+      operationId: SourceSnapshotsController_findLatestBySource
+      summary: Get latest snapshot for a specific source
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: source
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Latest snapshot for source
+        '404':
+          description: No snapshot found for source
+      tags:
+      - source-snapshots
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/listings/{listingId}/snapshots/{snapshotId}:
+    get:
+      operationId: SourceSnapshotsController_findOne
+      summary: Get a specific snapshot
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: snapshotId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Snapshot details
+        '404':
+          description: Snapshot not found
+      tags:
+      - source-snapshots
+      security:
+      - bearer: []
+    delete:
+      operationId: SourceSnapshotsController_remove
+      summary: Delete a snapshot
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: snapshotId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Snapshot deleted successfully
+        '404':
+          description: Snapshot not found
+      tags:
+      - source-snapshots
+      security:
+      - bearer: []
+components:
+  schemas:
+    CreateSourceSnapshotDto:
+      type: object
+      properties:
+        source:
+          type: string
+          description: Source identifier (e.g., google_places, yelp, manual)
+          example: google_places
+        externalId:
+          type: string
+          description: External ID from the source system
+          example: ChIJN1t_tDeuEmsRUsoyG83frY4
+        payload:
+          type: object
+          description: Raw payload data from the source
+          example:
+            name: Business Name
+            rating: 4.5
+        fetchedAt:
+          type: string
+          description: When the data was fetched from source (ISO 8601)
+          example: '2024-01-15T10:30:00Z'
+      required:
+      - source
+      - payload
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

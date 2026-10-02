@@ -1,0 +1,94 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Comments API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: Comments
+paths:
+  /public/v1/directories/{directory}/comments:
+    post:
+      operationId: CommentsController_create
+      summary: Leave a comment on a page (anonymous)
+      description: 'Unauthenticated. Requires the directory to have opted in via `submissionPolicy.comments = true`; otherwise 404 — a directory never accepts anonymous writes by default, and enabling reviews does not enable comments.
+
+
+        JSON body: `path`, `authorName` (≤80), `body` (≤4000), optional `email` (never published), `turnstileToken`, and the `website2` honeypot (leave empty). **There is no rating** — comments are discussion, not a verdict, and never move any average.
+
+
+        `path` is the page being commented on, e.g. `/herbs/ginger/`. It is normalised: query string and fragment stripped, lowercased, repeated slashes collapsed, and a trailing slash added unless the last segment contains a dot. Only `a-z 0-9 / . _ ~ -` are allowed, `.` and `..` segments are refused, and the result must be ≤300 characters.
+
+
+        Nothing submitted here is visible until a moderator approves it.
+
+
+        Rate limited to **5 per hour per IP**. Always returns **202 `{ accepted: true }`** for anything that validates — including submissions judged to be spam, which are stored with `status: spam`. Bots get no signal about which check caught them.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentDto'
+      responses:
+        '202':
+          description: Received. Not visible — queued for moderation.
+        '400':
+          description: Validation failed, or `path` is not an acceptable page path. The path check runs only after the spam checks have passed, so it reveals nothing about them.
+        '404':
+          description: Directory not found, or comments not enabled
+        '429':
+          description: Rate limit exceeded
+      tags:
+      - Comments
+components:
+  schemas:
+    CreateCommentDto:
+      type: object
+      properties:
+        path:
+          type: string
+          description: 'The page being commented on, as a path: `/herbs/ginger/`. Query string and fragment are stripped, it is lowercased, repeated slashes collapse, and a trailing slash is added unless the last segment is a file (`/feed.xml`). Only `a-z 0-9 / . _ ~ -` are allowed.'
+          example: /herbs/ginger/
+          maxLength: 2048
+        authorName:
+          type: string
+          description: Display name the commenter chooses. Unverified — there is no end-user auth, so this is text, not an identity, and consumers must render it as such.
+          maxLength: 80
+        body:
+          type: string
+          description: The comment itself. Plain text — render it escaped.
+          maxLength: 4000
+        email:
+          type: string
+          description: Commenter email, for follow-up. Never published.
+        turnstileToken:
+          type: string
+          description: Cloudflare Turnstile token from the widget.
+        website2:
+          type: string
+          description: Honeypot — leave empty. See CreateSubmissionDto.
+      required:
+      - path
+      - authorName
+      - body
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

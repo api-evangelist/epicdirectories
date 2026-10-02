@@ -1,0 +1,490 @@
+{
+  "@context": {
+    "@vocab": "https://epicdirectories.com/schema#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "epicdirectories": "https://epicdirectories.com/schema#",
+    "CreateFromTemplateDto": "epicdirectories:CreateFromTemplateDto",
+    "name": {
+      "@id": "epicdirectories:name",
+      "@type": "xsd:string"
+    },
+    "template": {
+      "@id": "epicdirectories:template",
+      "@type": "xsd:string"
+    },
+    "CreateDirectoryDto": "epicdirectories:CreateDirectoryDto",
+    "slug": {
+      "@id": "epicdirectories:slug",
+      "@type": "xsd:string"
+    },
+    "domain": {
+      "@id": "epicdirectories:domain"
+    },
+    "listingTypes": {
+      "@id": "epicdirectories:listingTypes"
+    },
+    "seoPolicy": {
+      "@id": "epicdirectories:seoPolicy"
+    },
+    "monetizationPolicy": {
+      "@id": "epicdirectories:monetizationPolicy"
+    },
+    "mediaPolicy": {
+      "@id": "epicdirectories:mediaPolicy"
+    },
+    "submissionPolicy": {
+      "@id": "epicdirectories:submissionPolicy"
+    },
+    "enrichmentPolicy": {
+      "@id": "epicdirectories:enrichmentPolicy"
+    },
+    "theme": {
+      "@id": "epicdirectories:theme",
+      "@type": "xsd:string"
+    },
+    "themeSettings": {
+      "@id": "epicdirectories:themeSettings"
+    },
+    "UpdateDirectoryDto": "epicdirectories:UpdateDirectoryDto",
+    "SetDirectoryTurnstileDto": "epicdirectories:SetDirectoryTurnstileDto",
+    "siteKey": {
+      "@id": "epicdirectories:siteKey",
+      "@type": "xsd:string"
+    },
+    "secret": {
+      "@id": "epicdirectories:secret",
+      "@type": "xsd:string"
+    },
+    "CreateSubmissionDto": "epicdirectories:CreateSubmissionDto",
+    "title": {
+      "@id": "epicdirectories:title",
+      "@type": "xsd:string"
+    },
+    "url": {
+      "@id": "epicdirectories:url",
+      "@type": "xsd:string"
+    },
+    "description": {
+      "@id": "epicdirectories:description",
+      "@type": "xsd:string"
+    },
+    "category": {
+      "@id": "epicdirectories:category",
+      "@type": "xsd:string"
+    },
+    "email": {
+      "@id": "epicdirectories:email",
+      "@type": "xsd:string"
+    },
+    "turnstileToken": {
+      "@id": "epicdirectories:turnstileToken",
+      "@type": "xsd:string"
+    },
+    "website2": {
+      "@id": "epicdirectories:website2",
+      "@type": "xsd:string"
+    },
+    "CreateFeedbackDto": "epicdirectories:CreateFeedbackDto",
+    "kind": {
+      "@id": "epicdirectories:kind",
+      "@type": "xsd:string"
+    },
+    "message": {
+      "@id": "epicdirectories:message",
+      "@type": "xsd:string"
+    },
+    "AcceptSubmissionDto": "epicdirectories:AcceptSubmissionDto",
+    "listingType": {
+      "@id": "epicdirectories:listingType",
+      "@type": "xsd:string"
+    },
+    "listingStatus": {
+      "@id": "epicdirectories:listingStatus",
+      "@type": "xsd:string"
+    },
+    "RejectSubmissionDto": "epicdirectories:RejectSubmissionDto",
+    "spam": {
+      "@id": "epicdirectories:spam",
+      "@type": "xsd:boolean"
+    },
+    "CreateWebhookDto": "epicdirectories:CreateWebhookDto",
+    "events": {
+      "@id": "epicdirectories:events",
+      "@container": "@list"
+    },
+    "isActive": {
+      "@id": "epicdirectories:isActive",
+      "@type": "xsd:boolean"
+    },
+    "debounceMs": {
+      "@id": "epicdirectories:debounceMs",
+      "@type": "xsd:decimal"
+    },
+    "UpdateWebhookDto": "epicdirectories:UpdateWebhookDto",
+    "CreateApiKeyDto": "epicdirectories:CreateApiKeyDto",
+    "directoryId": {
+      "@id": "epicdirectories:directoryId",
+      "@type": "xsd:string"
+    },
+    "scopes": {
+      "@id": "epicdirectories:scopes",
+      "@container": "@list"
+    },
+    "expiresAt": {
+      "@id": "epicdirectories:expiresAt",
+      "@type": "xsd:string"
+    },
+    "UpdateApiKeyDto": "epicdirectories:UpdateApiKeyDto",
+    "CreateListingDto": "epicdirectories:CreateListingDto",
+    "status": {
+      "@id": "epicdirectories:status",
+      "@type": "xsd:string"
+    },
+    "parentId": {
+      "@id": "epicdirectories:parentId"
+    },
+    "relationshipType": {
+      "@id": "epicdirectories:relationshipType"
+    },
+    "geo": {
+      "@id": "epicdirectories:geo"
+    },
+    "canonicalFields": {
+      "@id": "epicdirectories:canonicalFields"
+    },
+    "editorialFields": {
+      "@id": "epicdirectories:editorialFields"
+    },
+    "publishAt": {
+      "@id": "epicdirectories:publishAt"
+    },
+    "UpdateListingDto": "epicdirectories:UpdateListingDto",
+    "CreateAttributeTemplateDto": "epicdirectories:CreateAttributeTemplateDto",
+    "key": {
+      "@id": "epicdirectories:key",
+      "@type": "xsd:string"
+    },
+    "label": {
+      "@id": "epicdirectories:label",
+      "@type": "xsd:string"
+    },
+    "type": {
+      "@id": "epicdirectories:type",
+      "@type": "xsd:string"
+    },
+    "isFilterable": {
+      "@id": "epicdirectories:isFilterable",
+      "@type": "xsd:boolean"
+    },
+    "isSortable": {
+      "@id": "epicdirectories:isSortable",
+      "@type": "xsd:boolean"
+    },
+    "isSeoRelevant": {
+      "@id": "epicdirectories:isSeoRelevant",
+      "@type": "xsd:boolean"
+    },
+    "enumValues": {
+      "@id": "epicdirectories:enumValues",
+      "@container": "@list"
+    },
+    "settings": {
+      "@id": "epicdirectories:settings"
+    },
+    "UpdateAttributeTemplateDto": "epicdirectories:UpdateAttributeTemplateDto",
+    "CreateTaxonomyDto": "epicdirectories:CreateTaxonomyDto",
+    "structure": {
+      "@id": "epicdirectories:structure",
+      "@type": "xsd:string"
+    },
+    "UpdateTaxonomyDto": "epicdirectories:UpdateTaxonomyDto",
+    "CreateTermDto": "epicdirectories:CreateTermDto",
+    "parentTermId": {
+      "@id": "epicdirectories:parentTermId",
+      "@type": "xsd:string"
+    },
+    "metadata": {
+      "@id": "epicdirectories:metadata"
+    },
+    "UpdateTermDto": "epicdirectories:UpdateTermDto",
+    "AttributeValueDto": "epicdirectories:AttributeValueDto",
+    "attributeTemplateId": {
+      "@id": "epicdirectories:attributeTemplateId",
+      "@type": "xsd:string"
+    },
+    "value": {
+      "@id": "epicdirectories:value"
+    },
+    "SetAttributesDto": "epicdirectories:SetAttributesDto",
+    "attributes": {
+      "@id": "epicdirectories:attributes",
+      "@container": "@list"
+    },
+    "BulkSetAttributesDto": "epicdirectories:BulkSetAttributesDto",
+    "listingIds": {
+      "@id": "epicdirectories:listingIds",
+      "@container": "@list"
+    },
+    "CreateJobDto": "epicdirectories:CreateJobDto",
+    "jobType": {
+      "@id": "epicdirectories:jobType",
+      "@type": "xsd:string"
+    },
+    "input": {
+      "@id": "epicdirectories:input"
+    },
+    "CreateRecipeDto": "epicdirectories:CreateRecipeDto",
+    "recipeType": {
+      "@id": "epicdirectories:recipeType",
+      "@type": "xsd:string"
+    },
+    "scope": {
+      "@id": "epicdirectories:scope"
+    },
+    "constraints": {
+      "@id": "epicdirectories:constraints"
+    },
+    "ranking": {
+      "@id": "epicdirectories:ranking"
+    },
+    "seo": {
+      "@id": "epicdirectories:seo"
+    },
+    "UpdateRecipeDto": "epicdirectories:UpdateRecipeDto",
+    "PublicCreateTermDto": "epicdirectories:PublicCreateTermDto",
+    "parentSlug": {
+      "@id": "epicdirectories:parentSlug",
+      "@type": "xsd:string"
+    },
+    "PublicSubmissionPolicyDto": "epicdirectories:PublicSubmissionPolicyDto",
+    "suggestions": {
+      "@id": "epicdirectories:suggestions",
+      "@type": "xsd:boolean"
+    },
+    "feedback": {
+      "@id": "epicdirectories:feedback",
+      "@type": "xsd:boolean"
+    },
+    "reviews": {
+      "@id": "epicdirectories:reviews",
+      "@type": "xsd:boolean"
+    },
+    "comments": {
+      "@id": "epicdirectories:comments",
+      "@type": "xsd:boolean"
+    },
+    "UpdatePublicDirectoryDto": "epicdirectories:UpdatePublicDirectoryDto",
+    "CreatePublicJobDto": "epicdirectories:CreatePublicJobDto",
+    "PublicUpdateTermDto": "epicdirectories:PublicUpdateTermDto",
+    "CreatePublicListingDto": "epicdirectories:CreatePublicListingDto",
+    "parentListingType": {
+      "@id": "epicdirectories:parentListingType",
+      "@type": "xsd:string"
+    },
+    "taxonomies": {
+      "@id": "epicdirectories:taxonomies"
+    },
+    "BulkUpsertItemDto": "epicdirectories:BulkUpsertItemDto",
+    "BulkUpsertListingsDto": "epicdirectories:BulkUpsertListingsDto",
+    "items": {
+      "@id": "epicdirectories:items",
+      "@container": "@list"
+    },
+    "atomic": {
+      "@id": "epicdirectories:atomic",
+      "@type": "xsd:boolean"
+    },
+    "BatchListingItem": "epicdirectories:BatchListingItem",
+    "BatchListingsDto": "epicdirectories:BatchListingsDto",
+    "UpdatePublicListingDto": "epicdirectories:UpdatePublicListingDto",
+    "SetPublicAttributesDto": "epicdirectories:SetPublicAttributesDto",
+    "PublicTermAssignmentDto": "epicdirectories:PublicTermAssignmentDto",
+    "taxonomy": {
+      "@id": "epicdirectories:taxonomy",
+      "@type": "xsd:string"
+    },
+    "term": {
+      "@id": "epicdirectories:term",
+      "@type": "xsd:string"
+    },
+    "SetPublicTermsDto": "epicdirectories:SetPublicTermsDto",
+    "terms": {
+      "@id": "epicdirectories:terms",
+      "@container": "@list"
+    },
+    "PatchPublicTermsDto": "epicdirectories:PatchPublicTermsDto",
+    "add": {
+      "@id": "epicdirectories:add",
+      "@container": "@list"
+    },
+    "remove": {
+      "@id": "epicdirectories:remove",
+      "@container": "@list"
+    },
+    "CreatePublicSnapshotDto": "epicdirectories:CreatePublicSnapshotDto",
+    "source": {
+      "@id": "epicdirectories:source",
+      "@type": "xsd:string"
+    },
+    "externalId": {
+      "@id": "epicdirectories:externalId",
+      "@type": "xsd:string"
+    },
+    "payload": {
+      "@id": "epicdirectories:payload"
+    },
+    "fetchedAt": {
+      "@id": "epicdirectories:fetchedAt",
+      "@type": "xsd:string"
+    },
+    "EnrichListingDto": "epicdirectories:EnrichListingDto",
+    "direction": {
+      "@id": "epicdirectories:direction",
+      "@type": "xsd:string"
+    },
+    "force": {
+      "@id": "epicdirectories:force",
+      "@type": "xsd:boolean"
+    },
+    "SweepProbesDto": "epicdirectories:SweepProbesDto",
+    "limit": {
+      "@id": "epicdirectories:limit",
+      "@type": "xsd:decimal"
+    },
+    "SweepScreenshotsDto": "epicdirectories:SweepScreenshotsDto",
+    "width": {
+      "@id": "epicdirectories:width",
+      "@type": "xsd:decimal"
+    },
+    "height": {
+      "@id": "epicdirectories:height",
+      "@type": "xsd:decimal"
+    },
+    "listingSlugs": {
+      "@id": "epicdirectories:listingSlugs",
+      "@container": "@list"
+    },
+    "SweepResearchDto": "epicdirectories:SweepResearchDto",
+    "staleAfterDays": {
+      "@id": "epicdirectories:staleAfterDays",
+      "@type": "xsd:decimal"
+    },
+    "sources": {
+      "@id": "epicdirectories:sources",
+      "@container": "@list"
+    },
+    "declareFields": {
+      "@id": "epicdirectories:declareFields",
+      "@type": "xsd:boolean"
+    },
+    "ingestOg": {
+      "@id": "epicdirectories:ingestOg",
+      "@type": "xsd:boolean"
+    },
+    "ApplyScreeningDto": "epicdirectories:ApplyScreeningDto",
+    "dryRun": {
+      "@id": "epicdirectories:dryRun",
+      "@type": "xsd:boolean"
+    },
+    "hold": {
+      "@id": "epicdirectories:hold",
+      "@type": "xsd:boolean"
+    },
+    "CreatePublicMediaDto": "epicdirectories:CreatePublicMediaDto",
+    "alt": {
+      "@id": "epicdirectories:alt",
+      "@type": "xsd:string"
+    },
+    "caption": {
+      "@id": "epicdirectories:caption",
+      "@type": "xsd:string"
+    },
+    "role": {
+      "@id": "epicdirectories:role",
+      "@type": "xsd:string"
+    },
+    "sortOrder": {
+      "@id": "epicdirectories:sortOrder",
+      "@type": "xsd:decimal"
+    },
+    "UpdatePublicMediaDto": "epicdirectories:UpdatePublicMediaDto",
+    "CreateMediaAssetDto": "epicdirectories:CreateMediaAssetDto",
+    "sourceRef": {
+      "@id": "epicdirectories:sourceRef",
+      "@type": "xsd:string"
+    },
+    "variants": {
+      "@id": "epicdirectories:variants"
+    },
+    "UpdateMediaAssetDto": "epicdirectories:UpdateMediaAssetDto",
+    "cdnUrl": {
+      "@id": "epicdirectories:cdnUrl",
+      "@type": "xsd:string"
+    },
+    "CreateSourceSnapshotDto": "epicdirectories:CreateSourceSnapshotDto",
+    "CreateDomainDto": "epicdirectories:CreateDomainDto",
+    "isPrimary": {
+      "@id": "epicdirectories:isPrimary",
+      "@type": "xsd:boolean"
+    },
+    "RejectReviewDto": "epicdirectories:RejectReviewDto",
+    "CreateCommentDto": "epicdirectories:CreateCommentDto",
+    "path": {
+      "@id": "epicdirectories:path",
+      "@type": "xsd:string"
+    },
+    "authorName": {
+      "@id": "epicdirectories:authorName",
+      "@type": "xsd:string"
+    },
+    "body": {
+      "@id": "epicdirectories:body",
+      "@type": "xsd:string"
+    },
+    "RejectCommentDto": "epicdirectories:RejectCommentDto",
+    "ReplyToCommentDto": "epicdirectories:ReplyToCommentDto",
+    "reply": {
+      "@id": "epicdirectories:reply",
+      "@type": "xsd:string"
+    },
+    "replyAuthor": {
+      "@id": "epicdirectories:replyAuthor",
+      "@type": "xsd:string"
+    },
+    "UpdateOrderDto": "epicdirectories:UpdateOrderDto",
+    "placementUrl": {
+      "@id": "epicdirectories:placementUrl",
+      "@type": "xsd:string"
+    },
+    "operatorNotes": {
+      "@id": "epicdirectories:operatorNotes",
+      "@type": "xsd:string"
+    },
+    "CreateCompedOrderDto": "epicdirectories:CreateCompedOrderDto",
+    "purchaserEmail": {
+      "@id": "epicdirectories:purchaserEmail",
+      "@type": "xsd:string"
+    },
+    "targetUrl": {
+      "@id": "epicdirectories:targetUrl",
+      "@type": "xsd:string"
+    },
+    "anchorText": {
+      "@id": "epicdirectories:anchorText",
+      "@type": "xsd:string"
+    },
+    "brief": {
+      "@id": "epicdirectories:brief",
+      "@type": "xsd:string"
+    }
+  },
+  "@type": "schema:Dataset",
+  "schema:name": "EpicDirectories API JSON-LD context",
+  "schema:description": "A JSON-LD @context for the objects EpicDirectories's own API contract declares: one class per component schema, one property per declared field, typed from the contract. Derived by script (derive-json-ld.py, 2026-10-02) from openapi/epicdirectories-openapi.json.",
+  "dcterms:created": "2026-10-02",
+  "dcterms:source": [
+    "openapi/epicdirectories-openapi.json"
+  ]
+}

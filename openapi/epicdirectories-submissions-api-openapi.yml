@@ -1,0 +1,165 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Submissions API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: Submissions
+paths:
+  /public/v1/directories/{directory}/submissions:
+    post:
+      operationId: SubmissionsController_createSuggestion
+      summary: Suggest a listing (anonymous)
+      description: 'Unauthenticated. Requires the directory to have opted in via `submissionPolicy.suggestions = true`; otherwise 404 — a directory never accepts anonymous writes by default.
+
+
+        Rate limited to **5 per hour per IP, per directory**. Send a Cloudflare Turnstile token as `turnstileToken` when Turnstile is configured server-side.
+
+
+        **Programmatic callers:** send `X-API-Key` instead of a Turnstile token. A valid key whose scopes include `submissions` skips the human check and files directly as `pending`, with a much higher rate limit. A key is a stronger identity claim than Turnstile, which only approximates "probably human". An INVALID key is rejected with 401 rather than falling back to anonymous — omit the header entirely to submit anonymously.
+
+
+        Always returns **202 `{ accepted: true }`** for anything that passes validation — including submissions judged to be spam, which are stored with `status: spam` instead of `pending`. Bots get no signal about which check caught them. Nothing is published; an operator reviews and promotes.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubmissionDto'
+      responses:
+        '202':
+          description: Received. Not published — queued for review.
+        '400':
+          description: Validation failed
+        '404':
+          description: Directory not found, or not accepting suggestions
+        '429':
+          description: Rate limit exceeded
+      tags:
+      - Submissions
+  /public/v1/directories/{directory}/listings/{listingType}/{listingSlug}/feedback:
+    post:
+      operationId: SubmissionsController_createFeedback
+      summary: Leave feedback on a listing (anonymous)
+      description: 'Unauthenticated. Requires `submissionPolicy.feedback = true` on the directory, otherwise 404.
+
+
+        This is an **operator inbox**, not public reviews — nothing submitted here is rendered anywhere. `kind` is `correction`, `report`, or `comment`.
+
+
+        The target listing is resolved through the same visibility gate as public reads, so feedback on an unpublished listing returns 404 rather than confirming the draft exists.
+
+
+        Rate limited to **10 per hour per IP**. Always 202 on success, spam included.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingType
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingSlug
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFeedbackDto'
+      responses:
+        '202':
+          description: Received
+        '400':
+          description: Validation failed
+        '404':
+          description: Directory or listing not found, or feedback not enabled
+        '429':
+          description: Rate limit exceeded
+      tags:
+      - Submissions
+components:
+  schemas:
+    CreateFeedbackDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+          - correction
+          - report
+          - comment
+          description: What sort of feedback this is
+        message:
+          type: string
+          description: The feedback itself
+          maxLength: 4000
+        email:
+          type: string
+          description: Submitter email, for follow-up. Never published.
+        turnstileToken:
+          type: string
+          description: Cloudflare Turnstile token from the widget.
+        website2:
+          type: string
+          description: Honeypot — leave empty. See CreateSubmissionDto.
+      required:
+      - kind
+      - message
+    CreateSubmissionDto:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Name of the thing being suggested
+          maxLength: 200
+        url:
+          type: string
+          description: Its website
+        description:
+          type: string
+          description: What it is, in the submitter's words
+          maxLength: 2000
+        category:
+          type: string
+          description: Suggested category, as free text. NOT resolved to a taxonomy term here — an operator decides that on review, optionally via the taxonomy resolve endpoints.
+          maxLength: 100
+        email:
+          type: string
+          description: Submitter email, for follow-up. Never published.
+        turnstileToken:
+          type: string
+          description: Cloudflare Turnstile token from the widget. Required when Turnstile is configured.
+        website2:
+          type: string
+          description: Honeypot. Leave empty. A real browser never fills it, so a non-empty value is accepted with 202 and recorded as spam — silently, so bots get no signal to adapt.
+      required:
+      - title
+      - url
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

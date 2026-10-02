@@ -1,0 +1,191 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories submissions (admin) API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: submissions (admin)
+paths:
+  /v1/directories/{directoryId}/submissions:
+    get:
+      operationId: SubmissionsAdminController_list
+      summary: List submissions
+      description: Defaults to `status=pending` — the queue that needs a decision. Also returns `countsByStatus` across the whole directory, so the UI can show that spam exists without the operator switching filters to find out.
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: status
+        required: false
+        in: query
+        description: Defaults to `pending`
+        schema:
+          enum:
+          - pending
+          - accepted
+          - rejected
+          - spam
+          type: string
+      - name: kind
+        required: false
+        in: query
+        schema:
+          enum:
+          - listing_suggestion
+          - feedback
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Default 50, max 200
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Paginated submissions + counts by status
+        '404':
+          description: Directory not found or not yours
+      tags:
+      - submissions (admin)
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/submissions/{submissionId}:
+    get:
+      operationId: SubmissionsAdminController_get
+      summary: Get one submission, including its abuse metadata
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: submissionId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The submission
+        '404':
+          description: Not found
+      tags:
+      - submissions (admin)
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/submissions/{submissionId}/accept:
+    post:
+      operationId: SubmissionsAdminController_accept
+      summary: Accept a submission
+      description: 'For `feedback`, marks it handled. For `listing_suggestion`, **creates a Listing** from the payload — `listingType` is required, `slug` defaults to a slugified title, and the listing is created as **draft** unless `listingStatus` says otherwise (accepting should not silently publish a stranger''s unedited text).
+
+
+        Returns 409 on slug collision rather than auto-suffixing: a collision usually means the thing is already listed, and the right move is to reject the submission as a duplicate.'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: submissionId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptSubmissionDto'
+      responses:
+        '201':
+          description: Accepted; listing created for suggestions
+        '400':
+          description: listingType missing, or no usable title/slug
+        '409':
+          description: Already accepted, or slug collides with an existing listing
+      tags:
+      - submissions (admin)
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/submissions/{submissionId}/reject:
+    post:
+      operationId: SubmissionsAdminController_reject
+      summary: Reject a submission
+      description: 'Marks it `rejected`, or `spam` when `{ "spam": true }` — keeping the two distinct so abuse triage can tell "not a fit" from "attack traffic".'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: submissionId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectSubmissionDto'
+      responses:
+        '201':
+          description: Rejected
+        '404':
+          description: Not found
+      tags:
+      - submissions (admin)
+      security:
+      - bearer: []
+components:
+  schemas:
+    AcceptSubmissionDto:
+      type: object
+      properties:
+        listingType:
+          type: string
+          description: Listing type for the created listing. REQUIRED for `listing_suggestion`; ignored for feedback. Not validated against `Directory.listingTypes` — matching how the rest of the API behaves.
+        slug:
+          type: string
+          description: Slug for the created listing. Defaults to a slugified title. Returns 409 if it collides with an existing listing of the same type — deliberately not auto-suffixed, since a collision usually means the thing is already listed.
+        listingStatus:
+          type: string
+          description: Status for the created listing. Defaults to `draft` — accepting a suggestion should not silently publish a stranger's text. Pass `published` to go live immediately.
+          enum:
+          - draft
+          - published
+          - hidden
+        title:
+          type: string
+          description: Override the title. Defaults to the submitted title — worth setting, since submitter text is unedited.
+    RejectSubmissionDto:
+      type: object
+      properties:
+        spam:
+          type: boolean
+          description: Mark as spam rather than merely rejected, so abuse triage can separate the two.
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

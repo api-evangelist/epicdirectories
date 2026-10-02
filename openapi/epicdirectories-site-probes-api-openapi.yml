@@ -1,0 +1,96 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories site probes API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: site probes
+paths:
+  /v1/directories/{directoryId}/site-probes/dead-links:
+    get:
+      operationId: SiteProbesController_deadLinks
+      summary: Listings whose site is not answering
+      description: 'Joins this directory''s listings to the shared site-probe records.
+
+
+        **Excludes `blocked` by default.** A site refusing an automated client — routine behind Cloudflare — is not a dead link, and a report that mixes the two teaches an operator to ignore it. Pass `includeBlocked=true` to see them as a separate concern.
+
+
+        `summary.hostsNeverProbed` is the gap in the report: those hosts have no evidence either way until a sweep has run, and must not be read as healthy.'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: includeBlocked
+        required: false
+        in: query
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Affected listings plus a coverage summary
+        '404':
+          description: Directory not found or not yours
+      tags:
+      - site probes
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/site-probes/sweep:
+    post:
+      operationId: SiteProbesController_sweep
+      summary: Queue probes for this directory’s listings
+      description: 'Enqueues one job per distinct host whose evidence is missing or stale — not one per listing, so a directory with 40 listings on one domain queues one job.
+
+
+        Capped per run; the response reports `deferred` when the cap was hit rather than implying full coverage. Respects `enrichmentPolicy.probe === false`, which short-circuits before any work is queued.'
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        schema:
+          type: number
+      - name: force
+        required: false
+        in: query
+        description: Re-probe fresh records too
+        schema:
+          type: boolean
+      - name: kind
+        required: false
+        in: query
+        description: '`link` (default) checks whether each URL resolves. `site` captures what the page says — title, description, headings, body text, signals — and is what screening and evidence-bound descriptions read. Neither implies the other.'
+        schema:
+          enum:
+          - link
+          - site
+          type: string
+      responses:
+        '201':
+          description: Jobs queued
+      tags:
+      - site probes
+      security:
+      - bearer: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

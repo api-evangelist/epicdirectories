@@ -1,0 +1,61 @@
+generated: '2026-10-02'
+method: derived
+generator: derive-problem-types.py
+source:
+- openapi/epicdirectories-openapi.json
+format: custom
+envelope:
+  media_type: null
+  schema: null
+coverage:
+  operations: 206
+  statuses_declared: 8
+problems:
+- status: 400
+  title: Bad Request
+  description: Validation failed
+  operations: 43
+  media_types: []
+  schema: null
+- status: 401
+  title: Unauthorized
+  description: Missing or invalid X-API-Key
+  operations: 46
+  media_types: []
+  schema: null
+- status: 403
+  title: Forbidden
+  description: Key lacks the `write` scope
+  operations: 62
+  media_types: []
+  schema: null
+- status: 404
+  title: Not Found
+  description: Directory not found
+  operations: 162
+  media_types: []
+  schema: null
+- status: 409
+  title: Conflict
+  description: Already approved
+  operations: 33
+  media_types: []
+  schema: null
+- status: 413
+  title: Content Too Large
+  description: File exceeds 25 MB
+  operations: 2
+  media_types: []
+  schema: null
+- status: 429
+  title: Too Many Requests
+  description: Rate limit exceeded
+  operations: 6
+  media_types: []
+  schema: null
+- status: 503
+  title: Service Unavailable
+  description: Database or Redis unreachable; body lists what
+  operations: 7
+  media_types: []
+  schema: null

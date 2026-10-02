@@ -1,0 +1,267 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories Webhooks API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: Webhooks
+paths:
+  /v1/directories/{directoryId}/webhooks:
+    get:
+      operationId: WebhooksController_findAll
+      summary: List webhooks for a directory
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Array of webhooks
+        '401':
+          description: Unauthenticated
+        '404':
+          description: Directory not found
+      tags:
+      - Webhooks
+      security:
+      - bearer: []
+    post:
+      operationId: WebhooksController_create
+      summary: Create a webhook for a directory
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebhookDto'
+      responses:
+        '201':
+          description: Webhook created
+        '400':
+          description: Validation failed (e.g. invalid URL)
+        '401':
+          description: Unauthenticated
+        '404':
+          description: Directory not found
+      tags:
+      - Webhooks
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/webhooks/{webhookId}:
+    get:
+      operationId: WebhooksController_findOne
+      summary: Get a webhook
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: webhookId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Webhook details
+        '401':
+          description: Unauthenticated
+        '404':
+          description: Webhook not found
+      tags:
+      - Webhooks
+      security:
+      - bearer: []
+    patch:
+      operationId: WebhooksController_update
+      summary: Update a webhook
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: webhookId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebhookDto'
+      responses:
+        '200':
+          description: Webhook updated
+        '400':
+          description: Validation failed
+        '401':
+          description: Unauthenticated
+        '404':
+          description: Webhook not found
+      tags:
+      - Webhooks
+      security:
+      - bearer: []
+    delete:
+      operationId: WebhooksController_remove
+      summary: Delete a webhook
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: webhookId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Webhook deleted
+        '401':
+          description: Unauthenticated
+        '404':
+          description: Webhook not found
+      tags:
+      - Webhooks
+      security:
+      - bearer: []
+  /v1/directories/{directoryId}/webhooks/{webhookId}/test:
+    post:
+      operationId: WebhooksController_test
+      summary: Fire a test ping at the webhook URL (bypasses debounce)
+      parameters:
+      - name: directoryId
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: webhookId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Test ping queued / sent (delivery state updated on the webhook row)
+        '401':
+          description: Unauthenticated
+        '404':
+          description: Webhook not found
+      tags:
+      - Webhooks
+      security:
+      - bearer: []
+components:
+  schemas:
+    UpdateWebhookDto:
+      type: object
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+        events:
+          type: array
+          items:
+            type: string
+            enum:
+            - listing.created
+            - listing.updated
+            - listing.deleted
+            - submission.received
+            - review.received
+            - review.approved
+            - review.rejected
+            - comment.received
+            - comment.approved
+            - comment.rejected
+            - comment.updated
+            - listing.boosted
+            - order.received
+            - order.delivered
+            - directory.updated
+            - test.ping
+        isActive:
+          type: boolean
+        secret:
+          type: string
+        debounceMs:
+          type: number
+          minimum: 0
+          maximum: 600000
+    CreateWebhookDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Friendly name for the webhook (e.g. "CF Pages deploy hook")
+        url:
+          type: string
+          description: Target URL — POSTed on subscribed events
+        events:
+          type: array
+          description: 'Subscribed event names. Empty array = all events fire this webhook. Known events: `listing.created`, `listing.updated`, `listing.deleted` — fired on writes via either admin or public API; `submission.received` — an anonymous suggestion or feedback item needs review. Fired ONLY for items that reach `pending`; spam (honeypot or failed Turnstile) is stored silently and never notifies, so the channel stays worth reading. Payload: `{ submissionId, kind, listingId }`; `review.received` — a public review is waiting for moderation. Like `submission.received`, fired ONLY for items that reach `pending`. Payload: `{ reviewId, listingId, rating }`; `review.approved` — a review was published and the listing''s rating average moved. Consumers that render ratings from a build-time export need this one to know to rebuild. Payload: `{ reviewId, listingId, rating }`; `review.rejected` — a review that WAS published is no longer public, because it was unpublished, rejected or filed as spam. The mirror of `review.approved`, and the more urgent of the pair: it is what a consumer rebuilds on to take defamatory or abusive text off their site. Fired ONLY on the `approved` -> not-approved transition — rejecting a pending review was never public and fires nothing. Payload: `{ reviewId, listingId, rating }`; `comment.received` — a page comment is waiting for moderation. Fired ONLY for items that reach `pending`. Payload: `{ commentId, path }`; `comment.approved` — a page comment was published. A static site that renders comments rebuilds on this. Payload: `{ commentId, path }`; `comment.rejected` — a page comment that WAS published is no longer public (rejected, unpublished or filed as spam). Fired ONLY on the `approved` -> not-approved transition; subscribe to it if you render comments, since it is what takes one down. Payload: `{ commentId, path }`; `comment.updated` — the editors'' reply on a currently-approved comment was set, changed or cleared. Not fired for replies on unpublished comments. Payload: `{ commentId, path }`; `listing.boosted` — a listing became a premium listing, by purchase or by an operator grant. Payload: `{ listingId, paymentId?, amountCents?, currency? }`. A `listing.updated` is ALWAYS fired alongside it, so a consumer already subscribed to that will rebuild without subscribing to this one; subscribe to this if you want to treat a boost specially. `test.ping` — only fired from the test endpoint, bypasses debounce. Unknown names are REJECTED with 400. They used to be accepted for forward-compat, but a typo then produced a webhook that looked healthy and never fired — subscribe to a new event once it exists.'
+          example:
+          - listing.created
+          - listing.updated
+          items:
+            type: string
+            enum:
+            - listing.created
+            - listing.updated
+            - listing.deleted
+            - submission.received
+            - review.received
+            - review.approved
+            - review.rejected
+            - comment.received
+            - comment.approved
+            - comment.rejected
+            - comment.updated
+            - listing.boosted
+            - order.received
+            - order.delivered
+            - directory.updated
+            - test.ping
+        isActive:
+          type: boolean
+          description: Disable without deleting
+        secret:
+          type: string
+          description: 'Shared secret for HMAC-SHA256 payload signing. When set, every dispatch includes an `X-ED-Signature: sha256=<hex>` header — verify on your end by computing HMAC-SHA256 of the raw request body using this secret. Verify each ATTEMPT on its own bytes: a retry re-serialises the body with a fresh `timestamp`, so the signature legitimately differs between attempts of the same delivery. To deduplicate, use `X-ED-Delivery-Id`, which is stable across all attempts — see §13 of the integrator changelog. If unset, no signature header is sent (delivery still works). Write-only: no endpoint ever returns it, not even the create response. Responses carry `hasSecret: true|false` instead. Store your copy at the point you generate it — if you lose it, PATCH a new one rather than expecting to read the old one back.'
+        debounceMs:
+          type: number
+          description: 'Debounce window in milliseconds. Multiple events within the window collapse to a single dispatch — useful for collapsing bulk imports into one rebuild. NULL inherits the global default (30 000ms / 30s). Range: 0 (no debounce) to 600 000 (10 minutes) — the full range is honoured, including values ABOVE the global default, which used to be silently capped. When multiple webhooks for a directory specify different values, the smallest wins for the directory as a whole; webhooks leaving it NULL express no preference and do not drag the others down — v1 limitation.'
+          minimum: 0
+          maximum: 600000
+      required:
+      - url
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

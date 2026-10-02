@@ -1,0 +1,221 @@
+openapi: 3.2.0
+info:
+  title: EpicDirectories reviews (api key) API
+  description: API-first directory data platform.
+  version: '1.0'
+  contact: {}
+servers:
+- url: https://api.epicdirectories.com
+  description: Production
+- url: http://localhost:3333
+  description: Local development
+tags:
+- name: reviews (api key)
+paths:
+  /public/v1/directories/{directory}/listings/{listingType}/{listingSlug}/reviews:
+    get:
+      operationId: ReviewsReadController_list
+      summary: Approved reviews for a listing
+      description: 'Any valid key — no scope required, since these are published content.
+
+
+        Returns **approved reviews only**; there is no parameter that can surface pending, rejected or spam rows. Each carries `authorName`, `rating`, `body` and `createdAt` and nothing else: submitter email and abuse metadata are never exposed here.
+
+
+        `summary` gives `{ count, average }` for the listing — the same numbers `/export` puts on every listing, so a static build does not need this endpoint to render stars. `average` is `null`, not `0`, when there are no reviews.
+
+
+        `read:drafts` does not apply. A review on an unpublished listing is not reachable here at all, because the listing is resolved through the public visibility gate.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingType
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: listingSlug
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Default 50, max 200
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Approved reviews, newest first, plus the summary
+        '401':
+          description: Missing or invalid X-API-Key
+        '404':
+          description: Directory or listing not found
+      tags:
+      - reviews (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/reviews:
+    get:
+      operationId: ReviewsModerationController_list
+      summary: List the review queue
+      description: 'Requires the `reviews` scope. Defaults to `status=pending`. Also returns `countsByStatus` across the directory.
+
+
+        Each row carries `sameSourceOnListing`: how many OTHER reviews on the same listing arrived from the same (hashed) source address. Treat it as a hint, not a verdict — offices, campuses and mobile carriers put many real people behind one address.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: status
+        required: false
+        in: query
+        description: Defaults to `pending`
+        schema:
+          enum:
+          - pending
+          - approved
+          - rejected
+          - spam
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Default 50, max 200
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Paginated reviews + counts by status
+        '401':
+          description: Missing or invalid X-API-Key
+        '403':
+          description: Key lacks the `reviews` scope
+        '404':
+          description: Directory not found or out of key scope
+      tags:
+      - reviews (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/reviews/{reviewId}:
+    get:
+      operationId: ReviewsModerationController_get
+      summary: Get one review
+      description: Requires the `reviews` scope. Includes the abuse metadata (hashed ip, user agent, turnstile verdict) and the submitter email, none of which is ever exposed publicly.
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: reviewId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '200':
+          description: The review
+        '403':
+          description: Key lacks the `reviews` scope
+      tags:
+      - reviews (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/reviews/{reviewId}/approve:
+    post:
+      operationId: ReviewsModerationController_approve
+      summary: Approve a review — this publishes it
+      description: 'Requires **both** `reviews` and `write`. Approving makes a stranger''s text publicly readable and moves the listing''s rating average, so a read-only triage key can look but not publish.
+
+
+        The listing''s `reviewCount` and `ratingSum` are recomputed in the same transaction. Returns 409 if the review is already approved.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: reviewId
+        required: true
+        in: path
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Approved and published
+        '403':
+          description: Key lacks `reviews` or `write`
+        '409':
+          description: Already approved
+      tags:
+      - reviews (api key)
+      security:
+      - apiKey: []
+  /public/v1/directories/{directory}/reviews/{reviewId}/reject:
+    post:
+      operationId: ReviewsModerationController_reject
+      summary: Reject a review, or unpublish an approved one
+      description: 'Requires the `reviews` scope only — rejecting creates nothing and is reversible (a status flip; the row is retained), so it does not need `write`. Pass `{ "spam": true }` to file it as spam instead of merely rejected.
+
+
+        Rejecting an already-approved review unpublishes it and removes its rating from the listing''s average, in the same transaction.'
+      parameters:
+      - name: directory
+        required: true
+        in: path
+        schema:
+          type: string
+      - name: reviewId
+        required: true
+        in: path
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RejectReviewDto'
+      responses:
+        '201':
+          description: Rejected
+        '403':
+          description: Key lacks the `reviews` scope
+      tags:
+      - reviews (api key)
+      security:
+      - apiKey: []
+components:
+  schemas:
+    RejectReviewDto:
+      type: object
+      properties:
+        spam:
+          type: boolean
+          description: Mark as spam rather than merely rejected, so abuse triage can separate the two.
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key

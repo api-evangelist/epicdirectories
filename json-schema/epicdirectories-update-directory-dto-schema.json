@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/epicdirectories/main/json-schema/epicdirectories-update-directory-dto-schema.json",
+  "title": "UpdateDirectoryDto",
+  "x-generated": "2026-10-02",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/epicdirectories-openapi.json#/components/schemas/UpdateDirectoryDto",
+  "type": "object",
+  "properties": {
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly slug for the directory"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the directory"
+    },
+    "domain": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "Public domain this directory is published on, as a bare hostname. A pasted URL is normalised — scheme, port, path and case are stripped, and a leading \"www.\" is KEPT because it is part of the hostname. Null or an empty string clears it."
+    },
+    "listingTypes": {
+      "type": "object",
+      "description": "Listing types supported by this directory"
+    },
+    "seoPolicy": {
+      "type": "object",
+      "description": "SEO policy configuration"
+    },
+    "monetizationPolicy": {
+      "type": "object",
+      "description": "Monetization policy configuration"
+    },
+    "mediaPolicy": {
+      "type": "object",
+      "description": "Media policy configuration"
+    },
+    "submissionPolicy": {
+      "type": "object",
+      "description": "Opt-in for anonymous public writes. Absent/empty accepts nothing. Keys: `suggestions`, `feedback`, `reviews`, `comments` (page comments). Each flag must be exactly true — see common/directory-open-policy.ts."
+    },
+    "enrichmentPolicy": {
+      "type": "object",
+      "description": "Site-probe config. Absent = ON with defaults — unlike submissionPolicy, which is opt-in because it accepts untrusted writes. Probing writes nothing public. Keys: { probe: bool, autoApprove: bool, rubric?: string, linkSweepAttributes?: [{ key, liveness? }] }.\n\n`linkSweepAttributes` adds this directory’s own url-typed ATTRIBUTE values to the link sweep, which otherwise checks only the one URL in canonicalFields. An explicit allowlist, in priority order — enrichment writes url-typed attributes of its own (`site_og_image`, `site_canonical_url`, `site_final_url`) that nobody wants checked, and one sweep run is capped, so something has to go first. `liveness: \"endpoint\"` marks a field that is a machine surface rather than a page: any HTTP response counts as alive, and only an unreachable host or a 410 is dead. An API root answering 404 is normal.\n\n`sweepSchedule` makes the link sweep run on its own: `true` for daily, or `{ \"everyHours\": 24 }`. Absent means OFF, and that default is deliberate — unlike `probe`, which is on by default because a sweep only ever ran when a person asked for one. Removing the person does not keep that safe: every directory on the platform reads `probe !== false` today, so deriving the schedule from it would enrol all 74,387 listings in a perpetual crawl. `probe: false` still wins over any schedule. Catch-up after a capped run is automatic, so no cadence shorter than an hour is accepted or needed.\n\n`linkDeadOn` decides what counts as dead beyond an unreachable host: `{ tls: true }` counts a certificate fault, `{ timeoutAfter: 2 }` counts a URL that has timed out that many checks in a row. Both default OFF and neither can be turned on globally — three Convention Grid listings have a `www.` certificate that does not cover the host while serving 200 at the apex, and that report deliberately leaves them out."
+    },
+    "theme": {
+      "type": "string",
+      "description": "Theme identifier"
+    },
+    "themeSettings": {
+      "type": "object",
+      "description": "Theme settings (colors etc.)"
+    }
+  }
+}

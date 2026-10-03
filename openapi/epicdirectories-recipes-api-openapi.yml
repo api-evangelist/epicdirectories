@@ -162,41 +162,6 @@ paths:
       - bearer: []
 components:
   schemas:
-    UpdateRecipeDto:
-      type: object
-      properties:
-        recipeType:
-          type: string
-          description: Recipe type (e.g., collection, landing, feed)
-        slug:
-          type: string
-          description: URL-friendly slug
-          example: top-restaurants-nyc
-        scope:
-          type: object
-          description: Scope definition - filters for which listings to include
-          example:
-            listingType: restaurant
-            taxonomyTerms:
-            - cuisine:italian
-        constraints:
-          type: object
-          description: Constraints for the recipe (e.g., limit, geo bounds)
-          example:
-            limit: 50
-            radius: 10mi
-        ranking:
-          type: object
-          description: Ranking/sorting configuration
-          example:
-            sortBy: rating
-            order: desc
-        seo:
-          type: object
-          description: SEO metadata for the recipe output
-          example:
-            title: Top Italian Restaurants in NYC
-            metaDescription: '...'
     CreateRecipeDto:
       type: object
       properties:
@@ -236,6 +201,41 @@ components:
       - recipeType
       - slug
       - scope
+    UpdateRecipeDto:
+      type: object
+      properties:
+        recipeType:
+          type: string
+          description: Recipe type (e.g., collection, landing, feed)
+        slug:
+          type: string
+          description: URL-friendly slug
+          example: top-restaurants-nyc
+        scope:
+          type: object
+          description: Scope definition - filters for which listings to include
+          example:
+            listingType: restaurant
+            taxonomyTerms:
+            - cuisine:italian
+        constraints:
+          type: object
+          description: Constraints for the recipe (e.g., limit, geo bounds)
+          example:
+            limit: 50
+            radius: 10mi
+        ranking:
+          type: object
+          description: Ranking/sorting configuration
+          example:
+            sortBy: rating
+            order: desc
+        seo:
+          type: object
+          description: SEO metadata for the recipe output
+          example:
+            title: Top Italian Restaurants in NYC
+            metaDescription: '...'
   securitySchemes:
     bearer:
       scheme: bearer

@@ -139,58 +139,6 @@ paths:
       - bearer: []
 components:
   schemas:
-    UpdateAttributeTemplateDto:
-      type: object
-      properties:
-        label:
-          type: string
-          description: Human-readable label
-        type:
-          type: string
-          description: Attribute data type
-          enum:
-          - string
-          - text
-          - number
-          - boolean
-          - enum
-          - multi
-          - multi_enum
-          - date
-          - datetime
-          - range
-          - url
-          - email
-          - phone
-          - richtext
-          - json
-        isFilterable:
-          type: boolean
-          description: Whether this attribute can be used in filters
-          default: false
-        isSortable:
-          type: boolean
-          description: Whether this attribute can be used for sorting
-          default: false
-        isSeoRelevant:
-          type: boolean
-          description: Whether this attribute is relevant for SEO
-          default: false
-        enumValues:
-          description: Allowed values for enum/multi_enum types
-          example:
-          - option1
-          - option2
-          type: array
-          items:
-            type: string
-        settings:
-          type: object
-          description: Additional settings (validation rules, display hints, etc.)
-          example:
-            min: 0
-            max: 100
-            unit: USD
     CreateAttributeTemplateDto:
       type: object
       properties:
@@ -253,6 +201,58 @@ components:
       - key
       - label
       - type
+    UpdateAttributeTemplateDto:
+      type: object
+      properties:
+        label:
+          type: string
+          description: Human-readable label
+        type:
+          type: string
+          description: Attribute data type
+          enum:
+          - string
+          - text
+          - number
+          - boolean
+          - enum
+          - multi
+          - multi_enum
+          - date
+          - datetime
+          - range
+          - url
+          - email
+          - phone
+          - richtext
+          - json
+        isFilterable:
+          type: boolean
+          description: Whether this attribute can be used in filters
+          default: false
+        isSortable:
+          type: boolean
+          description: Whether this attribute can be used for sorting
+          default: false
+        isSeoRelevant:
+          type: boolean
+          description: Whether this attribute is relevant for SEO
+          default: false
+        enumValues:
+          description: Allowed values for enum/multi_enum types
+          example:
+          - option1
+          - option2
+          type: array
+          items:
+            type: string
+        settings:
+          type: object
+          description: Additional settings (validation rules, display hints, etc.)
+          example:
+            min: 0
+            max: 100
+            unit: USD
   securitySchemes:
     bearer:
       scheme: bearer

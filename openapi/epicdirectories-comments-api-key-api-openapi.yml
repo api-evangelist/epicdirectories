@@ -248,6 +248,12 @@ paths:
       - apiKey: []
 components:
   schemas:
+    RejectCommentDto:
+      type: object
+      properties:
+        spam:
+          type: boolean
+          description: Mark as spam rather than merely rejected, so abuse triage can separate the two.
     ReplyToCommentDto:
       type: object
       properties:
@@ -263,12 +269,6 @@ components:
           maxLength: 80
       required:
       - reply
-    RejectCommentDto:
-      type: object
-      properties:
-        spam:
-          type: boolean
-          description: Mark as spam rather than merely rejected, so abuse triage can separate the two.
   securitySchemes:
     bearer:
       scheme: bearer

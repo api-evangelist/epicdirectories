@@ -98,32 +98,6 @@ paths:
       - Submissions
 components:
   schemas:
-    CreateFeedbackDto:
-      type: object
-      properties:
-        kind:
-          type: string
-          enum:
-          - correction
-          - report
-          - comment
-          description: What sort of feedback this is
-        message:
-          type: string
-          description: The feedback itself
-          maxLength: 4000
-        email:
-          type: string
-          description: Submitter email, for follow-up. Never published.
-        turnstileToken:
-          type: string
-          description: Cloudflare Turnstile token from the widget.
-        website2:
-          type: string
-          description: Honeypot — leave empty. See CreateSubmissionDto.
-      required:
-      - kind
-      - message
     CreateSubmissionDto:
       type: object
       properties:
@@ -154,6 +128,32 @@ components:
       required:
       - title
       - url
+    CreateFeedbackDto:
+      type: object
+      properties:
+        kind:
+          type: string
+          enum:
+          - correction
+          - report
+          - comment
+          description: What sort of feedback this is
+        message:
+          type: string
+          description: The feedback itself
+          maxLength: 4000
+        email:
+          type: string
+          description: Submitter email, for follow-up. Never published.
+        turnstileToken:
+          type: string
+          description: Cloudflare Turnstile token from the widget.
+        website2:
+          type: string
+          description: Honeypot — leave empty. See CreateSubmissionDto.
+      required:
+      - kind
+      - message
   securitySchemes:
     bearer:
       scheme: bearer

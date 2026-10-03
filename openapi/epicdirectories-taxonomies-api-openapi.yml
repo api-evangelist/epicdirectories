@@ -297,24 +297,6 @@ paths:
       - bearer: []
 components:
   schemas:
-    CreateTermDto:
-      type: object
-      properties:
-        slug:
-          type: string
-          description: URL-friendly slug
-        label:
-          type: string
-          description: Display label
-        parentTermId:
-          type: string
-          description: Parent term ID for hierarchical taxonomies
-        metadata:
-          type: object
-          description: 'Free-form metadata: synonyms, seoKeywords, relatedTopics, featured, order, description, etc. Used by the industry-slop normalization workflow.'
-      required:
-      - slug
-      - label
     UpdateTermDto:
       type: object
       properties:
@@ -333,6 +315,24 @@ components:
         name:
           type: string
           description: Display name of the taxonomy
+    CreateTermDto:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: URL-friendly slug
+        label:
+          type: string
+          description: Display label
+        parentTermId:
+          type: string
+          description: Parent term ID for hierarchical taxonomies
+        metadata:
+          type: object
+          description: 'Free-form metadata: synonyms, seoKeywords, relatedTopics, featured, order, description, etc. Used by the industry-slop normalization workflow.'
+      required:
+      - slug
+      - label
     CreateTaxonomyDto:
       type: object
       properties:

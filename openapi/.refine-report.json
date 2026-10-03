@@ -1,7 +1,7 @@
 {
   "provider": "epicdirectories",
   "sources": [
-    "epicdirectories-openapi.json"
+    "_original/epicdirectories-openapi.json"
   ],
   "outputs": [
     "epicdirectories-api-keys-api-openapi.yml",
@@ -36,12 +36,11 @@
     "epicdirectories-taxonomies-api-openapi.yml",
     "epicdirectories-webhooks-api-openapi.yml"
   ],
-  "archived": [
-    "archived openapi/epicdirectories-openapi.json"
-  ],
+  "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
     "epicdirectories-openapi.json: upgraded openapi 3.0.0 -> OpenAPI 3.2.0",
     "epicdirectories-openapi.json: declared missing tag: api-keys",
     "epicdirectories-openapi.json: declared missing tag: attribute-templates",
@@ -74,7 +73,39 @@
     "epicdirectories-openapi.json: declared missing tag: submissions (api key)",
     "epicdirectories-openapi.json: declared missing tag: taxonomies",
     "epicdirectories-openapi.json: declared missing tag: webhooks",
-    "apis.yml register: written (+31 apis, 31 total)"
+    "apis.yml register: already-registered"
   ],
-  "skipped": []
+  "skipped": [
+    "epicdirectories-api-keys-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-attribute-templates-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-auth-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-comments-admin-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-comments-api-key-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-comments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-directories-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-domains-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-health-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-jobs-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-listing-attributes-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-listings-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-media-assets-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-orders-admin-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-orders-api-key-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-payments-admin-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-payments-api-key-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-payments-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-public-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-recipes-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-reviews-admin-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-reviews-api-key-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-reviews-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-screening-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-site-probes-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-source-snapshots-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-submissions-admin-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-submissions-api-key-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-submissions-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-taxonomies-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "epicdirectories-webhooks-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

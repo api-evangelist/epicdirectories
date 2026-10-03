@@ -231,20 +231,77 @@ paths:
       - bearer: []
 components:
   schemas:
-    SetDirectoryTurnstileDto:
+    UpdateDirectoryDto:
       type: object
       properties:
-        siteKey:
+        slug:
           type: string
-          description: The Turnstile SITE key — the public half, rendered in the page as data-sitekey. Published through /export so the form and the verifier cannot disagree about which widget is in use.
-          example: 0x4AAAAAAECip5aOzNT_oCWH
-        secret:
+          description: URL-friendly slug for the directory
+        name:
           type: string
-          description: 'The Turnstile SECRET key — the private half. Stored, never returned by any endpoint in any shape. Required on every write, including one that only means to change the site key: the two are a pair and are replaced together.'
-          example: 0x4AAAAAAECip…
-      required:
-      - siteKey
-      - secret
+          description: Display name of the directory
+        domain:
+          type:
+          - object
+          - 'null'
+          description: Public domain this directory is published on, as a bare hostname. A pasted URL is normalised — scheme, port, path and case are stripped, and a leading "www." is KEPT because it is part of the hostname. Null or an empty string clears it.
+          example: golfthis.com
+        listingTypes:
+          type: object
+          description: Listing types supported by this directory
+          example:
+          - event
+          - series
+        seoPolicy:
+          type: object
+          description: SEO policy configuration
+        monetizationPolicy:
+          type: object
+          description: Monetization policy configuration
+        mediaPolicy:
+          type: object
+          description: Media policy configuration
+        submissionPolicy:
+          type: object
+          description: 'Opt-in for anonymous public writes. Absent/empty accepts nothing. Keys: `suggestions`, `feedback`, `reviews`, `comments` (page comments). Each flag must be exactly true — see common/directory-open-policy.ts.'
+          example:
+            suggestions: true
+            feedback: true
+        enrichmentPolicy:
+          type: object
+          description: 'Site-probe config. Absent = ON with defaults — unlike submissionPolicy, which is opt-in because it accepts untrusted writes. Probing writes nothing public. Keys: { probe: bool, autoApprove: bool, rubric?: string, linkSweepAttributes?: [{ key, liveness? }] }.
+
+
+            `linkSweepAttributes` adds this directory’s own url-typed ATTRIBUTE values to the link sweep, which otherwise checks only the one URL in canonicalFields. An explicit allowlist, in priority order — enrichment writes url-typed attributes of its own (`site_og_image`, `site_canonical_url`, `site_final_url`) that nobody wants checked, and one sweep run is capped, so something has to go first. `liveness: "endpoint"` marks a field that is a machine surface rather than a page: any HTTP response counts as alive, and only an unreachable host or a 410 is dead. An API root answering 404 is normal.
+
+
+            `sweepSchedule` makes the link sweep run on its own: `true` for daily, or `{ "everyHours": 24 }`. Absent means OFF, and that default is deliberate — unlike `probe`, which is on by default because a sweep only ever ran when a person asked for one. Removing the person does not keep that safe: every directory on the platform reads `probe !== false` today, so deriving the schedule from it would enrol all 74,387 listings in a perpetual crawl. `probe: false` still wins over any schedule. Catch-up after a capped run is automatic, so no cadence shorter than an hour is accepted or needed.
+
+
+            `linkDeadOn` decides what counts as dead beyond an unreachable host: `{ tls: true }` counts a certificate fault, `{ timeoutAfter: 2 }` counts a URL that has timed out that many checks in a row. Both default OFF and neither can be turned on globally — three Convention Grid listings have a `www.` certificate that does not cover the host while serving 200 at the apex, and that report deliberately leaves them out.'
+          example:
+            probe: true
+            linkSweepAttributes:
+            - key: docs_url
+            - key: openapi_url
+            - key: base_url
+              liveness: endpoint
+            - key: signup_url
+            linkDeadOn:
+              tls: true
+              timeoutAfter: 2
+            sweepSchedule:
+              everyHours: 24
+        theme:
+          type: string
+          description: Theme identifier
+          example: default
+        themeSettings:
+          type: object
+          description: Theme settings (colors etc.)
+          example:
+            primaryColor: '#3b82f6'
+            secondaryColor: '#1e40af'
     CreateFromTemplateDto:
       type: object
       properties:
@@ -337,77 +394,20 @@ components:
       - slug
       - name
       - listingTypes
-    UpdateDirectoryDto:
+    SetDirectoryTurnstileDto:
       type: object
       properties:
-        slug:
+        siteKey:
           type: string
-          description: URL-friendly slug for the directory
-        name:
+          description: The Turnstile SITE key — the public half, rendered in the page as data-sitekey. Published through /export so the form and the verifier cannot disagree about which widget is in use.
+          example: 0x4AAAAAAECip5aOzNT_oCWH
+        secret:
           type: string
-          description: Display name of the directory
-        domain:
-          type:
-          - object
-          - 'null'
-          description: Public domain this directory is published on, as a bare hostname. A pasted URL is normalised — scheme, port, path and case are stripped, and a leading "www." is KEPT because it is part of the hostname. Null or an empty string clears it.
-          example: golfthis.com
-        listingTypes:
-          type: object
-          description: Listing types supported by this directory
-          example:
-          - event
-          - series
-        seoPolicy:
-          type: object
-          description: SEO policy configuration
-        monetizationPolicy:
-          type: object
-          description: Monetization policy configuration
-        mediaPolicy:
-          type: object
-          description: Media policy configuration
-        submissionPolicy:
-          type: object
-          description: 'Opt-in for anonymous public writes. Absent/empty accepts nothing. Keys: `suggestions`, `feedback`, `reviews`, `comments` (page comments). Each flag must be exactly true — see common/directory-open-policy.ts.'
-          example:
-            suggestions: true
-            feedback: true
-        enrichmentPolicy:
-          type: object
-          description: 'Site-probe config. Absent = ON with defaults — unlike submissionPolicy, which is opt-in because it accepts untrusted writes. Probing writes nothing public. Keys: { probe: bool, autoApprove: bool, rubric?: string, linkSweepAttributes?: [{ key, liveness? }] }.
-
-
-            `linkSweepAttributes` adds this directory’s own url-typed ATTRIBUTE values to the link sweep, which otherwise checks only the one URL in canonicalFields. An explicit allowlist, in priority order — enrichment writes url-typed attributes of its own (`site_og_image`, `site_canonical_url`, `site_final_url`) that nobody wants checked, and one sweep run is capped, so something has to go first. `liveness: "endpoint"` marks a field that is a machine surface rather than a page: any HTTP response counts as alive, and only an unreachable host or a 410 is dead. An API root answering 404 is normal.
-
-
-            `sweepSchedule` makes the link sweep run on its own: `true` for daily, or `{ "everyHours": 24 }`. Absent means OFF, and that default is deliberate — unlike `probe`, which is on by default because a sweep only ever ran when a person asked for one. Removing the person does not keep that safe: every directory on the platform reads `probe !== false` today, so deriving the schedule from it would enrol all 74,387 listings in a perpetual crawl. `probe: false` still wins over any schedule. Catch-up after a capped run is automatic, so no cadence shorter than an hour is accepted or needed.
-
-
-            `linkDeadOn` decides what counts as dead beyond an unreachable host: `{ tls: true }` counts a certificate fault, `{ timeoutAfter: 2 }` counts a URL that has timed out that many checks in a row. Both default OFF and neither can be turned on globally — three Convention Grid listings have a `www.` certificate that does not cover the host while serving 200 at the apex, and that report deliberately leaves them out.'
-          example:
-            probe: true
-            linkSweepAttributes:
-            - key: docs_url
-            - key: openapi_url
-            - key: base_url
-              liveness: endpoint
-            - key: signup_url
-            linkDeadOn:
-              tls: true
-              timeoutAfter: 2
-            sweepSchedule:
-              everyHours: 24
-        theme:
-          type: string
-          description: Theme identifier
-          example: default
-        themeSettings:
-          type: object
-          description: Theme settings (colors etc.)
-          example:
-            primaryColor: '#3b82f6'
-            secondaryColor: '#1e40af'
+          description: 'The Turnstile SECRET key — the private half. Stored, never returned by any endpoint in any shape. Required on every write, including one that only means to change the site key: the two are a pair and are replaced together.'
+          example: 0x4AAAAAAECip…
+      required:
+      - siteKey
+      - secret
   securitySchemes:
     bearer:
       scheme: bearer

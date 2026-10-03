@@ -173,42 +173,6 @@ paths:
       - bearer: []
 components:
   schemas:
-    UpdateWebhookDto:
-      type: object
-      properties:
-        name:
-          type: string
-        url:
-          type: string
-        events:
-          type: array
-          items:
-            type: string
-            enum:
-            - listing.created
-            - listing.updated
-            - listing.deleted
-            - submission.received
-            - review.received
-            - review.approved
-            - review.rejected
-            - comment.received
-            - comment.approved
-            - comment.rejected
-            - comment.updated
-            - listing.boosted
-            - order.received
-            - order.delivered
-            - directory.updated
-            - test.ping
-        isActive:
-          type: boolean
-        secret:
-          type: string
-        debounceMs:
-          type: number
-          minimum: 0
-          maximum: 600000
     CreateWebhookDto:
       type: object
       properties:
@@ -256,6 +220,42 @@ components:
           maximum: 600000
       required:
       - url
+    UpdateWebhookDto:
+      type: object
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+        events:
+          type: array
+          items:
+            type: string
+            enum:
+            - listing.created
+            - listing.updated
+            - listing.deleted
+            - submission.received
+            - review.received
+            - review.approved
+            - review.rejected
+            - comment.received
+            - comment.approved
+            - comment.rejected
+            - comment.updated
+            - listing.boosted
+            - order.received
+            - order.delivered
+            - directory.updated
+            - test.ping
+        isActive:
+          type: boolean
+        secret:
+          type: string
+        debounceMs:
+          type: number
+          minimum: 0
+          maximum: 600000
   securitySchemes:
     bearer:
       scheme: bearer

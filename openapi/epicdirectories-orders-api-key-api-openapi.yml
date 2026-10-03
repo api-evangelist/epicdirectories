@@ -189,23 +189,6 @@ paths:
       - apiKey: []
 components:
   schemas:
-    UpdateOrderDto:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-          - received
-          - in_progress
-          - delivered
-          - cancelled
-          description: '`refunded` is deliberately not accepted. A refund is Stripe''s fact and arrives over the signed webhook, which sets it; a status typed here could claim money went back when it did not. An order already refunded answers 409 to any status change.'
-        placementUrl:
-          type: string
-          description: Where it was published. **Required in order to reach `delivered`** — it is the only field that lets anyone but the operator confirm the buyer got what they paid for. Send an empty string to clear it, which is refused while the order is delivered.
-        operatorNotes:
-          type: string
-          description: Operator-only. Never rendered publicly. Empty string clears it.
     CreateCompedOrderDto:
       type: object
       properties:
@@ -230,6 +213,23 @@ components:
           description: Why it was comped, ideally.
       required:
       - kind
+    UpdateOrderDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - received
+          - in_progress
+          - delivered
+          - cancelled
+          description: '`refunded` is deliberately not accepted. A refund is Stripe''s fact and arrives over the signed webhook, which sets it; a status typed here could claim money went back when it did not. An order already refunded answers 409 to any status change.'
+        placementUrl:
+          type: string
+          description: Where it was published. **Required in order to reach `delivered`** — it is the only field that lets anyone but the operator confirm the buyer got what they paid for. Send an empty string to clear it, which is refused while the order is delivered.
+        operatorNotes:
+          type: string
+          description: Operator-only. Never rendered publicly. Empty string clears it.
   securitySchemes:
     bearer:
       scheme: bearer

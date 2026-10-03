@@ -213,6 +213,60 @@ paths:
       - bearer: []
 components:
   schemas:
+    UpdateListingDto:
+      type: object
+      properties:
+        slug:
+          type: string
+          description: URL-friendly slug for the listing
+        title:
+          type: string
+          description: Title of the listing
+        status:
+          type: string
+          description: Listing status
+          enum:
+          - draft
+          - published
+          - hidden
+          default: draft
+        parentId:
+          type:
+          - object
+          - 'null'
+          description: Parent listing ID for hierarchical relationships. Pass null to clear.
+        relationshipType:
+          type:
+          - object
+          - 'null'
+          description: Relationship type (e.g., series_of, brand_of, chapter_of). Pass null to clear.
+        geo:
+          type: object
+          description: Geographic data (country, admin1, city, neighborhood, coordinates)
+          example:
+            country: US
+            admin1: CA
+            city: San Francisco
+            lat: 37.7749
+            lng: -122.4194
+        canonicalFields:
+          type: object
+          description: Canonical fields (queryable, indexable)
+          example:
+            website: https://example.com
+            phone: +1-555-555-5555
+        editorialFields:
+          type: object
+          description: Editorial fields (descriptions, notes)
+          example:
+            description: A great place...
+            editorNotes: Verified Jan 2024
+        publishAt:
+          type:
+          - object
+          - 'null'
+          description: Scheduled publish time (ISO 8601). When set on a status:draft listing, public read endpoints surface it as published once the time has passed — no cron required, status column stays as draft until manually published. Pass null to clear.
+          example: '2026-12-31T09:00:00Z'
     CreateListingDto:
       type: object
       properties:
@@ -274,60 +328,6 @@ components:
       - listingType
       - slug
       - title
-    UpdateListingDto:
-      type: object
-      properties:
-        slug:
-          type: string
-          description: URL-friendly slug for the listing
-        title:
-          type: string
-          description: Title of the listing
-        status:
-          type: string
-          description: Listing status
-          enum:
-          - draft
-          - published
-          - hidden
-          default: draft
-        parentId:
-          type:
-          - object
-          - 'null'
-          description: Parent listing ID for hierarchical relationships. Pass null to clear.
-        relationshipType:
-          type:
-          - object
-          - 'null'
-          description: Relationship type (e.g., series_of, brand_of, chapter_of). Pass null to clear.
-        geo:
-          type: object
-          description: Geographic data (country, admin1, city, neighborhood, coordinates)
-          example:
-            country: US
-            admin1: CA
-            city: San Francisco
-            lat: 37.7749
-            lng: -122.4194
-        canonicalFields:
-          type: object
-          description: Canonical fields (queryable, indexable)
-          example:
-            website: https://example.com
-            phone: +1-555-555-5555
-        editorialFields:
-          type: object
-          description: Editorial fields (descriptions, notes)
-          example:
-            description: A great place...
-            editorNotes: Verified Jan 2024
-        publishAt:
-          type:
-          - object
-          - 'null'
-          description: Scheduled publish time (ISO 8601). When set on a status:draft listing, public read endpoints surface it as published once the time has passed — no cron required, status column stays as draft until manually published. Pass null to clear.
-          example: '2026-12-31T09:00:00Z'
   securitySchemes:
     bearer:
       scheme: bearer

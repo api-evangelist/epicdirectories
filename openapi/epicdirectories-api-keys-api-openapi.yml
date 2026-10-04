@@ -110,6 +110,26 @@ paths:
       - bearer: []
 components:
   schemas:
+    UpdateApiKeyDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Updated name for the API key
+        scopes:
+          type: array
+          description: Updated scopes. Omit to leave unchanged; `[]` makes the key read-only (published listings only).
+          items:
+            type: string
+            enum:
+            - write
+            - read:drafts
+            - submissions
+            - reviews
+            - payments
+        expiresAt:
+          type: string
+          description: Updated expiration date
     CreateApiKeyDto:
       type: object
       properties:
@@ -140,26 +160,6 @@ components:
       required:
       - name
       - scopes
-    UpdateApiKeyDto:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Updated name for the API key
-        scopes:
-          type: array
-          description: Updated scopes. Omit to leave unchanged; `[]` makes the key read-only (published listings only).
-          items:
-            type: string
-            enum:
-            - write
-            - read:drafts
-            - submissions
-            - reviews
-            - payments
-        expiresAt:
-          type: string
-          description: Updated expiration date
   securitySchemes:
     bearer:
       scheme: bearer

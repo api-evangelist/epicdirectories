@@ -166,6 +166,12 @@ paths:
       - apiKey: []
 components:
   schemas:
+    RejectSubmissionDto:
+      type: object
+      properties:
+        spam:
+          type: boolean
+          description: Mark as spam rather than merely rejected, so abuse triage can separate the two.
     AcceptSubmissionDto:
       type: object
       properties:
@@ -185,12 +191,6 @@ components:
         title:
           type: string
           description: Override the title. Defaults to the submitted title — worth setting, since submitter text is unedited.
-    RejectSubmissionDto:
-      type: object
-      properties:
-        spam:
-          type: boolean
-          description: Mark as spam rather than merely rejected, so abuse triage can separate the two.
   securitySchemes:
     bearer:
       scheme: bearer

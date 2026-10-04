@@ -229,6 +229,27 @@ paths:
       - bearer: []
 components:
   schemas:
+    CreateMediaAssetDto:
+      type: object
+      properties:
+        source:
+          type: string
+          description: Source of the media (e.g., upload, google_places, yelp)
+          example: upload
+        sourceRef:
+          type: string
+          description: Reference to source (URL or external ID)
+          example: https://example.com/image.jpg
+        variants:
+          type: object
+          description: Variant configurations
+          example:
+            thumbnail:
+              width: 150
+              height: 150
+      required:
+      - source
+      - sourceRef
     UpdateMediaAssetDto:
       type: object
       properties:
@@ -260,27 +281,6 @@ components:
         sortOrder:
           type: number
           description: Display order within a listing (ascending). 0 first.
-    CreateMediaAssetDto:
-      type: object
-      properties:
-        source:
-          type: string
-          description: Source of the media (e.g., upload, google_places, yelp)
-          example: upload
-        sourceRef:
-          type: string
-          description: Reference to source (URL or external ID)
-          example: https://example.com/image.jpg
-        variants:
-          type: object
-          description: Variant configurations
-          example:
-            thumbnail:
-              width: 150
-              height: 150
-      required:
-      - source
-      - sourceRef
   securitySchemes:
     bearer:
       scheme: bearer

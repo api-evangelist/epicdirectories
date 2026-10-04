@@ -3762,96 +3762,33 @@ paths:
       - apiKey: []
 components:
   schemas:
-    PublicUpdateTermDto:
+    PublicCreateTermDto:
       type: object
       properties:
+        slug:
+          type: string
+          description: URL-friendly slug
         label:
           type: string
-          description: Display label. Does NOT change the slug — the term is still addressed by its original slug.
+          description: Display label
         parentTermId:
-          type: object
+          type: string
           description: Parent term ID for hierarchical taxonomies
         metadata:
           type: object
-          description: 'Free-form metadata. Conventional keys: synonyms, seoKeywords, relatedTopics, description, seoTitle, seoDescription, featured, order. **Full-replace on PATCH** — sending `{ metadata: { synonyms: [...] } }` wipes seoKeywords and every other key. Read-modify-write when partially updating: GET the term, spread its metadata, add your fields, send the merged object back.'
+          description: 'Free-form metadata: synonyms, seoKeywords, relatedTopics, featured, order, description, etc. Used by the industry-slop normalization workflow.'
         parentSlug:
-          type:
-          - object
-          - 'null'
-          description: 'Parent term, addressed by slug — the public surface''s identifier. Resolved against this taxonomy only. Mutually exclusive with `parentTermId`: sending both is a 400 rather than a silent precedence rule. Send `null` to unparent.'
-    PublicSubmissionPolicyDto:
-      type: object
-      properties:
-        suggestions:
-          type: boolean
-          description: Accept anonymous listing suggestions. Each one lands as `pending` for review.
-        feedback:
-          type: boolean
-          description: Accept anonymous feedback on an existing listing.
-        reviews:
-          type: boolean
-          description: Accept anonymous reviews — star-rated, and an approved one moves the listing average.
-        comments:
-          type: boolean
-          description: 'Accept anonymous page comments — unrated, keyed by page path. Independent of `reviews` on purpose: a site can want reader discussion without public star ratings.'
-    CreatePublicMediaDto:
-      type: object
-      properties:
-        url:
           type: string
-          description: 'Publicly reachable http(s) URL of the image. We fetch it server-side, store the original in R2, and queue variant generation — so the asset survives the source URL going away. The asset is created with `status: "pending"` and flips to `ready` once the original is stored; poll `GET .../media` to watch for it. `data:`, `file:` and private/link-local addresses are rejected with 400.'
-          example: https://cdn.example.com/photos/acme-hall.jpg
-        source:
-          type: string
-          description: Where the image came from, for provenance — e.g. `official_site`, `google_places`, `operator_supplied`. Free-form; defaults to `url`.
-          example: official_site
-        alt:
-          type: string
-          description: Alt text. Set it here — it is the one media field that affects both accessibility and image SEO, and it cannot be inferred from the file.
-        caption:
-          type: string
-          description: Human-readable caption rendered near the image.
-        role:
-          type: string
-          description: Disambiguates what the asset is FOR — consumers pick the page hero by this rather than by position. Closed set; anything else is rejected with 400 rather than silently stored.
-          enum:
-          - hero
-          - thumbnail
-          - gallery
-          - logo
-          - site_screenshot
-          - site_og
-          example: hero
-        sortOrder:
-          type: number
-          description: Display order within the listing, ascending. Ties break on createdAt.
-          minimum: 0
-          default: 0
+          description: 'Parent term, addressed by slug — the public surface''s identifier. Resolved against this taxonomy only. Mutually exclusive with `parentTermId`: sending both is a 400 rather than a silent precedence rule.'
       required:
-      - url
-    UpdatePublicMediaDto:
+      - slug
+      - label
+    UpdateTaxonomyDto:
       type: object
       properties:
-        alt:
+        name:
           type: string
-          description: Alt text. Send `""` to clear.
-        caption:
-          type: string
-          description: Caption. Send `""` to clear.
-        role:
-          type: string
-          description: Asset role.
-          enum:
-          - hero
-          - thumbnail
-          - gallery
-          - logo
-          - site_screenshot
-          - site_og
-        sortOrder:
-          type: number
-          description: Display order, ascending.
-          minimum: 0
+          description: Display name of the taxonomy
     UpdateRecipeDto:
       type: object
       properties:
@@ -3887,105 +3824,6 @@ components:
           example:
             title: Top Italian Restaurants in NYC
             metaDescription: '...'
-    PatchPublicTermsDto:
-      type: object
-      properties:
-        add:
-          description: Assignments to add, as { taxonomy, term } slug pairs. Adding a pair the listing already has is a no-op, not a conflict — so a retried request is safe.
-          type: array
-          items:
-            $ref: '#/components/schemas/PublicTermAssignmentDto'
-        remove:
-          description: Assignments to remove. Removing a pair the listing does not have is a no-op, for the same reason.
-          type: array
-          items:
-            $ref: '#/components/schemas/PublicTermAssignmentDto'
-    PublicCreateTermDto:
-      type: object
-      properties:
-        slug:
-          type: string
-          description: URL-friendly slug
-        label:
-          type: string
-          description: Display label
-        parentTermId:
-          type: string
-          description: Parent term ID for hierarchical taxonomies
-        metadata:
-          type: object
-          description: 'Free-form metadata: synonyms, seoKeywords, relatedTopics, featured, order, description, etc. Used by the industry-slop normalization workflow.'
-        parentSlug:
-          type: string
-          description: 'Parent term, addressed by slug — the public surface''s identifier. Resolved against this taxonomy only. Mutually exclusive with `parentTermId`: sending both is a 400 rather than a silent precedence rule.'
-      required:
-      - slug
-      - label
-    UpdateWebhookDto:
-      type: object
-      properties:
-        name:
-          type: string
-        url:
-          type: string
-        events:
-          type: array
-          items:
-            type: string
-            enum:
-            - listing.created
-            - listing.updated
-            - listing.deleted
-            - submission.received
-            - review.received
-            - review.approved
-            - review.rejected
-            - comment.received
-            - comment.approved
-            - comment.rejected
-            - comment.updated
-            - listing.boosted
-            - order.received
-            - order.delivered
-            - directory.updated
-            - test.ping
-        isActive:
-          type: boolean
-        secret:
-          type: string
-        debounceMs:
-          type: number
-          minimum: 0
-          maximum: 600000
-    SetPublicTermsDto:
-      type: object
-      properties:
-        terms:
-          description: Replace-all set of taxonomy term assignments by slug. Sending an empty array clears all terms.
-          type: array
-          items:
-            $ref: '#/components/schemas/PublicTermAssignmentDto'
-      required:
-      - terms
-    CreateTaxonomyDto:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Display name of the taxonomy
-        slug:
-          type: string
-          description: URL-friendly slug
-        structure:
-          type: string
-          description: Taxonomy structure type
-          enum:
-          - flat
-          - hierarchical
-          default: flat
-      required:
-      - name
-      - slug
     CreateAttributeTemplateDto:
       type: object
       properties:
@@ -4048,6 +3886,534 @@ components:
       - key
       - label
       - type
+    SweepScreenshotsDto:
+      type: object
+      properties:
+        limit:
+          type: number
+          description: How many listings to queue this run. Capped at 50 regardless of what you send — rendering is metered browser time on a shared account, so one directory cannot drain the day for every other consumer. The response reports `deferred` when the cap bit, and the next run picks up where this one stopped.
+          minimum: 1
+          maximum: 50
+          default: 50
+        force:
+          type: boolean
+          description: 'Re-capture listings that already have a screenshot, replacing it. Off by default, so a repeated sweep is cheap and idempotent rather than re-rendering the whole directory.
+
+
+            **Use this when the existing capture is the problem** — a challenge page, or a blank that predates the blank-render check. The replacement is stored and live BEFORE the old asset is removed, so a failed re-capture leaves the current screenshot in place rather than clearing it.'
+          default: false
+        width:
+          type: number
+          description: 'Width of the `site` variant for this run, in pixels. **Send this alone and the height follows the capture''s 3:2** — 400 becomes 400x267, 600 becomes 600x400. That is almost always what you want, and computing 266.67 by hand is how a directory ends up with a variant whose aspect quietly crops every screenshot.
+
+
+            Capped at 1200, the renderer''s own capture width: anything larger is an upscale of pixels that do not exist, which reads as a rendering bug rather than a choice.
+
+
+            Set `enrichmentPolicy.screenshot` on the directory to make a size stick across every sweep; this parameter is for one run.'
+          minimum: 100
+          maximum: 1200
+        height:
+          type: number
+          description: Height of the `site` variant, in pixels. Only needed for an aspect other than the capture's 3:2 — and note that a different aspect means cover-fit CROPS, from the top. 400x252 for instance discards about 5.5% of each capture's height. Capped at 800 for the same reason as `width`.
+          minimum: 1
+          maximum: 800
+        listingSlugs:
+          description: 'Capture these listings specifically, by slug, instead of letting the sweep choose.
+
+
+            A named set is an **instruction**, so the retry window is bypassed — if you can see a listing has no screenshot and ask for it by name, you get an attempt. It does NOT replace an existing screenshot; pass `force` as well for that.
+
+
+            Use it to retry a listing whose URL you just fixed, or to re-capture a few at a new size without re-rendering the directory. Slugs that match nothing come back as `unmatchedSlugs` rather than being silently dropped. Still subject to the per-run cap.'
+          maxItems: 50
+          example:
+          - acme-digital
+          - bizapedia
+          type: array
+          items:
+            type: string
+    UpdatePublicListingDto:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Display title
+        status:
+          type: string
+          description: Lifecycle status
+          enum:
+          - draft
+          - published
+          - hidden
+          default: draft
+        parentId:
+          type: object
+          description: Parent listing UUID — the id returned on any read. Mutually exclusive with parentSlug; sending both is a 400. Must belong to the same directory. On PATCH, send `null` to detach the listing from its parent.
+        parentSlug:
+          type: string
+          description: Parent listing slug (resolved within the same directory). Requires parentListingType whenever the parent is a different type than this listing — which, for the series/event hierarchy, is always. Prefer parentId if you have it.
+        parentListingType:
+          type: string
+          description: Parent listing type. Defaults to this listing's type when omitted.
+        relationshipType:
+          type: string
+          description: Relationship type to parent (e.g. series_of, brand_of, chapter_of)
+        geo:
+          type: object
+          description: 'Geographic data. **Full-replace on PATCH** — sending `{ geo: { lat: 36.17 } }` wipes every other geo key. To partially update, GET the listing first and merge: `PATCH { geo: { ...existing.geo, lat: 36.17 } }`.
+
+
+            **Recognized keys** (free-form JSON, but these are what the admin UI and adapters read):
+
+            - `lat`, `lng` — numbers
+
+            - `country` — ISO 3166-1 alpha-2, e.g. `US`
+
+            - `admin1` — state/region as an ISO 3166-2 fragment, e.g. `OH`. **This is the state field** — `state` and `region` are NOT read, and using them leaves the admin Location section blank.
+
+            - `city`, `streetAddress`, `postalCode`
+
+            - `timezone` — IANA, e.g. `America/New_York`
+
+
+            Any other key is stored and returned untouched, but nothing renders it.'
+          example:
+            country: US
+            admin1: NV
+            city: Las Vegas
+            lat: 36.17
+            lng: -115.14
+        canonicalFields:
+          type: object
+          description: 'Canonical fields (queryable, indexable). Common keys: address, phone, email, website. **Full-replace on PATCH** — sending one key drops every other. Read-modify-write when partially updating.'
+        editorialFields:
+          type: object
+          description: 'Editorial copy. Conventional keys: description, seoTitle, seoDescription, ogImage, noindex, canonicalUrl, synonyms, audiences, pricing. **Full-replace on PATCH** — sending `{ editorialFields: { seoTitle: "X" } }` wipes the description and every other key. Admin UI handles this by GET → spread → PATCH; third-party callers must do the same when partially updating.'
+        publishAt:
+          type:
+          - object
+          - 'null'
+          description: Scheduled publish (ISO 8601). Listings with status:draft + publishAt in the past surface as published on read endpoints. Pass null to clear.
+        taxonomies:
+          type: object
+          description: Taxonomy term assignments. Keys are taxonomy slugs; values are arrays of term slugs. Each taxonomy you list gets its assignments replaced — taxonomies you DON'T list are left alone (per-taxonomy partial-update). All slugs must exist or the whole request returns 400 with the unknown pairs (no partial writes). Use [] to clear a taxonomy.
+          example:
+            industries:
+            - automotive-tradeshows
+            regions:
+            - north-america
+        slug:
+          type: string
+          description: 'New slug. Renaming **preserves the old slug as an alias**: every read that addresses this listing by the old `(listingType, slug)` keeps resolving, and answers with the new slug — so a consumer can compare the two and emit a 301 instead of serving the same listing at two live URLs. `GET .../listing-aliases` returns the whole redirect map for a directory in one call.
+
+
+            Renaming back to a slug this listing previously used consumes that alias rather than creating a cycle. A slug held live, or held as an alias by a **different** listing, is a 409.'
+          pattern: ^[a-z0-9-]+$
+    SetPublicAttributesDto:
+      type: object
+      properties:
+        attributes:
+          type: object
+          description: Attribute values keyed by attribute template `key` (not UUID). Unknown keys return 400 with the list of valid keys for this listing type.
+          example:
+            start_date: '2026-01-07'
+            venue: Las Vegas Convention Center
+            expected_attendance: 180000
+      required:
+      - attributes
+    BatchListingsDto:
+      type: object
+      properties:
+        items:
+          description: Array of (listingType, slug) pairs to fetch. Maximum 200 per request — split larger sets into multiple calls. Order of returned items mirrors the input order; missing listings are dropped (not returned as nulls) so callers should diff against the request to detect 404s.
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchListingItem'
+      required:
+      - items
+    PatchPublicTermsDto:
+      type: object
+      properties:
+        add:
+          description: Assignments to add, as { taxonomy, term } slug pairs. Adding a pair the listing already has is a no-op, not a conflict — so a retried request is safe.
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicTermAssignmentDto'
+        remove:
+          description: Assignments to remove. Removing a pair the listing does not have is a no-op, for the same reason.
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicTermAssignmentDto'
+    CreatePublicSnapshotDto:
+      type: object
+      properties:
+        source:
+          type: string
+          description: Source identifier — free-form, but use a stable string per provider (e.g. google_places, hermes_research, manual_csv).
+        externalId:
+          type: string
+          description: Upstream record ID for dedup (e.g. Google place_id, scraper URL hash).
+        payload:
+          type: object
+          description: Raw research/source payload to preserve in the evidence locker.
+        fetchedAt:
+          type: string
+          description: When the underlying source data was fetched. Defaults to now if omitted.
+      required:
+      - source
+      - payload
+    PublicUpdateTermDto:
+      type: object
+      properties:
+        label:
+          type: string
+          description: Display label. Does NOT change the slug — the term is still addressed by its original slug.
+        parentTermId:
+          type: object
+          description: Parent term ID for hierarchical taxonomies
+        metadata:
+          type: object
+          description: 'Free-form metadata. Conventional keys: synonyms, seoKeywords, relatedTopics, description, seoTitle, seoDescription, featured, order. **Full-replace on PATCH** — sending `{ metadata: { synonyms: [...] } }` wipes seoKeywords and every other key. Read-modify-write when partially updating: GET the term, spread its metadata, add your fields, send the merged object back.'
+        parentSlug:
+          type:
+          - object
+          - 'null'
+          description: 'Parent term, addressed by slug — the public surface''s identifier. Resolved against this taxonomy only. Mutually exclusive with `parentTermId`: sending both is a 400 rather than a silent precedence rule. Send `null` to unparent.'
+    PublicSubmissionPolicyDto:
+      type: object
+      properties:
+        suggestions:
+          type: boolean
+          description: Accept anonymous listing suggestions. Each one lands as `pending` for review.
+        feedback:
+          type: boolean
+          description: Accept anonymous feedback on an existing listing.
+        reviews:
+          type: boolean
+          description: Accept anonymous reviews — star-rated, and an approved one moves the listing average.
+        comments:
+          type: boolean
+          description: 'Accept anonymous page comments — unrated, keyed by page path. Independent of `reviews` on purpose: a site can want reader discussion without public star ratings.'
+    CreatePublicJobDto:
+      type: object
+      properties:
+        jobType:
+          type: string
+          description: Type of job. `media_process`, `recipe_build` and `recipe_rebuild_all` exist on the operator API but are refused here — each would be a button that does nothing, and the 400 names the route that actually does the job.
+          enum:
+          - import
+          - enrichment
+        input:
+          type: object
+          description: 'Job input, passed through to the processor. Shape depends on `jobType` — an `import` wants `{ config: { listingType, ... } }`. Validated by the processor rather than here: `inputJson` is stored as sent, so a malformed input surfaces as a job that fails with a reason rather than a request that 400s and leaves no record.'
+      required:
+      - jobType
+    BulkUpsertListingsDto:
+      type: object
+      properties:
+        items:
+          description: Listings to upsert, keyed on (listingType, slug). Max 500.
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkUpsertItemDto'
+        atomic:
+          type: boolean
+          description: 'When true, an item that fails aborts the whole request and nothing is written.\n\nDefault is **false** — per-item results, so one bad row cannot reject 499 good ones. That differs from the rest of this API, where a partial write is never allowed, and the difference is deliberate: at this size, all-or-nothing means a 9,000-listing import fails on row 8,997 and you start again. Set true if you need the stricter contract.'
+          default: false
+      required:
+      - items
+    CreateWebhookDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Friendly name for the webhook (e.g. "CF Pages deploy hook")
+        url:
+          type: string
+          description: Target URL — POSTed on subscribed events
+        events:
+          type: array
+          description: 'Subscribed event names. Empty array = all events fire this webhook. Known events: `listing.created`, `listing.updated`, `listing.deleted` — fired on writes via either admin or public API; `submission.received` — an anonymous suggestion or feedback item needs review. Fired ONLY for items that reach `pending`; spam (honeypot or failed Turnstile) is stored silently and never notifies, so the channel stays worth reading. Payload: `{ submissionId, kind, listingId }`; `review.received` — a public review is waiting for moderation. Like `submission.received`, fired ONLY for items that reach `pending`. Payload: `{ reviewId, listingId, rating }`; `review.approved` — a review was published and the listing''s rating average moved. Consumers that render ratings from a build-time export need this one to know to rebuild. Payload: `{ reviewId, listingId, rating }`; `review.rejected` — a review that WAS published is no longer public, because it was unpublished, rejected or filed as spam. The mirror of `review.approved`, and the more urgent of the pair: it is what a consumer rebuilds on to take defamatory or abusive text off their site. Fired ONLY on the `approved` -> not-approved transition — rejecting a pending review was never public and fires nothing. Payload: `{ reviewId, listingId, rating }`; `comment.received` — a page comment is waiting for moderation. Fired ONLY for items that reach `pending`. Payload: `{ commentId, path }`; `comment.approved` — a page comment was published. A static site that renders comments rebuilds on this. Payload: `{ commentId, path }`; `comment.rejected` — a page comment that WAS published is no longer public (rejected, unpublished or filed as spam). Fired ONLY on the `approved` -> not-approved transition; subscribe to it if you render comments, since it is what takes one down. Payload: `{ commentId, path }`; `comment.updated` — the editors'' reply on a currently-approved comment was set, changed or cleared. Not fired for replies on unpublished comments. Payload: `{ commentId, path }`; `listing.boosted` — a listing became a premium listing, by purchase or by an operator grant. Payload: `{ listingId, paymentId?, amountCents?, currency? }`. A `listing.updated` is ALWAYS fired alongside it, so a consumer already subscribed to that will rebuild without subscribing to this one; subscribe to this if you want to treat a boost specially. `test.ping` — only fired from the test endpoint, bypasses debounce. Unknown names are REJECTED with 400. They used to be accepted for forward-compat, but a typo then produced a webhook that looked healthy and never fired — subscribe to a new event once it exists.'
+          example:
+          - listing.created
+          - listing.updated
+          items:
+            type: string
+            enum:
+            - listing.created
+            - listing.updated
+            - listing.deleted
+            - submission.received
+            - review.received
+            - review.approved
+            - review.rejected
+            - comment.received
+            - comment.approved
+            - comment.rejected
+            - comment.updated
+            - listing.boosted
+            - order.received
+            - order.delivered
+            - directory.updated
+            - test.ping
+        isActive:
+          type: boolean
+          description: Disable without deleting
+        secret:
+          type: string
+          description: 'Shared secret for HMAC-SHA256 payload signing. When set, every dispatch includes an `X-ED-Signature: sha256=<hex>` header — verify on your end by computing HMAC-SHA256 of the raw request body using this secret. Verify each ATTEMPT on its own bytes: a retry re-serialises the body with a fresh `timestamp`, so the signature legitimately differs between attempts of the same delivery. To deduplicate, use `X-ED-Delivery-Id`, which is stable across all attempts — see §13 of the integrator changelog. If unset, no signature header is sent (delivery still works). Write-only: no endpoint ever returns it, not even the create response. Responses carry `hasSecret: true|false` instead. Store your copy at the point you generate it — if you lose it, PATCH a new one rather than expecting to read the old one back.'
+        debounceMs:
+          type: number
+          description: 'Debounce window in milliseconds. Multiple events within the window collapse to a single dispatch — useful for collapsing bulk imports into one rebuild. NULL inherits the global default (30 000ms / 30s). Range: 0 (no debounce) to 600 000 (10 minutes) — the full range is honoured, including values ABOVE the global default, which used to be silently capped. When multiple webhooks for a directory specify different values, the smallest wins for the directory as a whole; webhooks leaving it NULL express no preference and do not drag the others down — v1 limitation.'
+          minimum: 0
+          maximum: 600000
+      required:
+      - url
+    BulkUpsertItemDto:
+      type: object
+      properties:
+        listingType:
+          type: string
+          description: Listing type slug. Must be declared on the directory.
+        slug:
+          type: string
+          description: URL-friendly slug, unique within directory + listingType.
+        title:
+          type: string
+          description: Display title. Required when creating; optional when updating an existing listing, where omitting it leaves the current title alone.
+        status:
+          type: string
+          description: Lifecycle status. Defaults to `draft` on create.
+        geo:
+          type: object
+          description: Structured location. Full-replace, like everywhere else.
+        canonicalFields:
+          type: object
+          description: Free-form canonical fields. Full-replace.
+        editorialFields:
+          type: object
+          description: Free-form editorial fields. Full-replace.
+        taxonomies:
+          type: object
+          description: 'Taxonomy term assignments, keyed by taxonomy slug. Same semantics as on create.
+
+
+            An **array** replaces that taxonomy''s assignments; an **object** applies a delta:
+
+            `{ industries: [''fashion''] }` replaces, `{ industries: { add: [''retail''], remove: [''mining''] } }` adds and removes. Taxonomies not named are untouched either way.
+
+
+            The delta form exists because replace cannot express "add one tag", so two concurrent read-modify-write cycles silently lose one of the additions — nothing errors and a listing just stops appearing under a category. Use the array form for an authoritative full sync and the delta form for a retag.'
+          example:
+            industries:
+              add:
+              - fashion
+              remove:
+              - mining
+        attributes:
+          type: object
+          description: 'Attribute values keyed by `AttributeTemplate.key`.\n\nAccepted here but NOT on the single-listing create, deliberately: the single path has `PUT .../attributes` one call away, whereas in bulk that extra call is the difference between 2N and N round trips — which is the entire point of this endpoint.'
+          example:
+            rating: 4.7
+        parentId:
+          type: string
+          description: Parent listing id, within the same directory.
+        publishAt:
+          type: string
+          description: Scheduled publish time. A past value reads as published.
+      required:
+      - listingType
+      - slug
+    UpdateAttributeTemplateDto:
+      type: object
+      properties:
+        label:
+          type: string
+          description: Human-readable label
+        type:
+          type: string
+          description: Attribute data type
+          enum:
+          - string
+          - text
+          - number
+          - boolean
+          - enum
+          - multi
+          - multi_enum
+          - date
+          - datetime
+          - range
+          - url
+          - email
+          - phone
+          - richtext
+          - json
+        isFilterable:
+          type: boolean
+          description: Whether this attribute can be used in filters
+          default: false
+        isSortable:
+          type: boolean
+          description: Whether this attribute can be used for sorting
+          default: false
+        isSeoRelevant:
+          type: boolean
+          description: Whether this attribute is relevant for SEO
+          default: false
+        enumValues:
+          description: Allowed values for enum/multi_enum types
+          example:
+          - option1
+          - option2
+          type: array
+          items:
+            type: string
+        settings:
+          type: object
+          description: Additional settings (validation rules, display hints, etc.)
+          example:
+            min: 0
+            max: 100
+            unit: USD
+    ApplyScreeningDto:
+      type: object
+      properties:
+        dryRun:
+          type: boolean
+          description: Report what would change and write nothing. The counts are computed by the same code path that does the writing, so a dry run cannot disagree with the real one.
+          default: false
+        hold:
+          type: boolean
+          description: 'Pull flagged listings back to draft as well as tagging them. On by default: which verdicts unpublish is a property of the policy, not of the caller. Set false for a tag-only pass when you want to read the queue before anything leaves the directory.'
+          default: true
+        limit:
+          type: number
+          description: How many listings to act on, capped at 2000. The response reports `deferred` when the cap bit rather than implying full coverage.
+          minimum: 1
+          maximum: 2000
+          default: 2000
+    UpdateWebhookDto:
+      type: object
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+        events:
+          type: array
+          items:
+            type: string
+            enum:
+            - listing.created
+            - listing.updated
+            - listing.deleted
+            - submission.received
+            - review.received
+            - review.approved
+            - review.rejected
+            - comment.received
+            - comment.approved
+            - comment.rejected
+            - comment.updated
+            - listing.boosted
+            - order.received
+            - order.delivered
+            - directory.updated
+            - test.ping
+        isActive:
+          type: boolean
+        secret:
+          type: string
+        debounceMs:
+          type: number
+          minimum: 0
+          maximum: 600000
+    SweepResearchDto:
+      type: object
+      properties:
+        limit:
+          type: number
+          description: 'How many listings to queue this run. Capped at 100 regardless of what you send: each job is a request to somebody else''s server, and a directory with ten thousand listings must not be able to point a burst that size at one host. The response reports `deferred` when the cap bit, and the next run picks up where this one stopped.'
+          minimum: 1
+          maximum: 100
+          default: 100
+        force:
+          type: boolean
+          description: Re-read every listing regardless of how recently it was last read. Off by default, so a repeated sweep costs only the listings that have gone stale rather than re-fetching the whole directory.
+          default: false
+        staleAfterDays:
+          type: number
+          description: Treat data older than this many days as stale and re-read it. **This is the knob for periodic refresh** — run the same sweep on a schedule and it re-reads only what has aged past the window. `0` means "everything is stale", which is `force` by another name.
+          minimum: 0
+          maximum: 3650
+          default: 90
+        sources:
+          type: array
+          description: 'Which sources to gather from. Defaults to `site` alone.
+
+
+            Each writes into fields prefixed with its own name — `site_title`, `google_rating` — so two sources describing the same thing can never overwrite each other. That convention exists because the unprefixed form already went wrong: a bare `rating` held 2,418 values from a partner import and one from Google, with nothing recording which was which.
+
+
+            **`google_places` is billable.** Google charges per request, where `site` costs only a fetch, so it is never included by default — a sweep over thousands of listings has to ask for it. Matches are confidence-gated: Places returns its best guess with no score, and a listing whose title is not really a place would otherwise be attached to an unrelated nearby business.'
+          default:
+          - site
+          items:
+            type: string
+            enum:
+            - site
+            - google_places
+        declareFields:
+          type: boolean
+          description: 'Create the attribute templates these sources write into, if the directory has not declared them already.
+
+
+            **Send this once, on your first call.** Research only writes into fields the directory has declared — without a template for `site_title` there is nowhere for the title to go, and the sweep succeeds while writing nothing. This declares all of them in one step instead of eleven separate calls.
+
+
+            Templates it creates are marked `{ derived: true, source }`, which is what allows later sweeps to refresh them. **Templates that already exist are left exactly as they are** — if you declared `site_title` yourself and filled it in by hand, this will not quietly convert it into a field a sweep may overwrite.'
+          default: false
+        ingestOg:
+          type: boolean
+          description: 'Fetch each page''s og:image and store it as a `site_og` media asset, rather than keeping only the URL. **On by default.**
+
+
+            The URL alone means every image you render is a hotlink to someone else''s CDN. These are marketing sites — they redesign, change host, and rotate cache-busting paths, and when they do your listing shows a broken image with nothing to say it happened. Importing once makes the bytes yours.
+
+
+            Costs one fetch and one stored image per listing, so set `false` if you only want the text fields. A listing that already has a `site_og` is left alone — re-running updates the `site_og_image` field but never replaces the stored asset.'
+          default: true
+        listingSlugs:
+          description: 'Research these listings specifically, by slug, instead of letting the sweep choose.
+
+
+            A named set is an **instruction**, so the staleness window is bypassed — asking for a listing by name gets it re-read. Unlike a screenshot this destroys nothing: each read is stored as its own snapshot, so the previous evidence survives.
+
+
+            Slugs that match nothing come back as `unmatchedSlugs` rather than being silently dropped. Still subject to the per-run cap.'
+          maxItems: 100
+          example:
+          - acme-digital
+          - bizapedia
+          type: array
+          items:
+            type: string
+    BatchListingItem:
+      type: object
+      properties:
+        listingType:
+          type: string
+          description: Listing type slug
+          example: event
+        slug:
+          type: string
+          description: Listing slug
+          example: aapex-2026
+      required:
+      - listingType
+      - slug
     CreatePublicListingDto:
       type: object
       properties:
@@ -4128,144 +4494,160 @@ components:
       - listingType
       - slug
       - title
-    BatchListingItem:
+    SweepProbesDto:
       type: object
       properties:
-        listingType:
+        kind:
           type: string
-          description: Listing type slug
-          example: event
-        slug:
-          type: string
-          description: Listing slug
-          example: aapex-2026
-      required:
-      - listingType
-      - slug
-    UpdatePublicListingDto:
-      type: object
-      properties:
-        title:
-          type: string
-          description: Display title
-        status:
-          type: string
-          description: Lifecycle status
+          description: 'What to check.
+
+
+            - `link` (default) — **does this URL resolve?** Keyed per URL, because a host-level answer cannot see a dead path on a live domain. This is what `dead-links` reads.
+
+            - `site` — **what does this page say?** Captures title, description, headings, body text and signals. Keyed per host and shared across directories, so two directories listing the same company pay for one probe.
+
+
+            They are not interchangeable and neither implies the other. A directory can have every URL confirmed alive and no captured content at all — which is exactly the state EpicWebDesigners was in when this parameter was added.'
           enum:
-          - draft
-          - published
-          - hidden
-          default: draft
-        parentId:
-          type: object
-          description: Parent listing UUID — the id returned on any read. Mutually exclusive with parentSlug; sending both is a 400. Must belong to the same directory. On PATCH, send `null` to detach the listing from its parent.
-        parentSlug:
+          - link
+          - site
+          default: link
+        limit:
+          type: number
+          description: 'How many probes to queue this run. Capped at 500 regardless of what you send — probing costs are pooled across every consumer, so one directory cannot drain the budget for the rest. The response reports `deferred` when the cap bit, and successive runs rotate: candidates are ordered oldest-checked first, so a directory larger than the cap is eventually covered rather than stuck on the same slice.'
+          minimum: 1
+          maximum: 500
+          default: 500
+        force:
+          type: boolean
+          description: 'Re-check URLs whose record is still current. Off by default, so a repeated sweep only covers what has gone stale and is cheap to run on a schedule.
+
+
+            Use it when the checker itself changed and existing verdicts were computed by the old one.'
+          default: false
+    PublicTermAssignmentDto:
+      type: object
+      properties:
+        taxonomy:
           type: string
-          description: Parent listing slug (resolved within the same directory). Requires parentListingType whenever the parent is a different type than this listing — which, for the series/event hierarchy, is always. Prefer parentId if you have it.
-        parentListingType:
+          description: Taxonomy slug (e.g. industries)
+        term:
           type: string
-          description: Parent listing type. Defaults to this listing's type when omitted.
-        relationshipType:
+          description: Term slug within that taxonomy (e.g. technology)
+      required:
+      - taxonomy
+      - term
+    CreateRecipeDto:
+      type: object
+      properties:
+        recipeType:
           type: string
-          description: Relationship type to parent (e.g. series_of, brand_of, chapter_of)
-        geo:
-          type: object
-          description: 'Geographic data. **Full-replace on PATCH** — sending `{ geo: { lat: 36.17 } }` wipes every other geo key. To partially update, GET the listing first and merge: `PATCH { geo: { ...existing.geo, lat: 36.17 } }`.
-
-
-            **Recognized keys** (free-form JSON, but these are what the admin UI and adapters read):
-
-            - `lat`, `lng` — numbers
-
-            - `country` — ISO 3166-1 alpha-2, e.g. `US`
-
-            - `admin1` — state/region as an ISO 3166-2 fragment, e.g. `OH`. **This is the state field** — `state` and `region` are NOT read, and using them leaves the admin Location section blank.
-
-            - `city`, `streetAddress`, `postalCode`
-
-            - `timezone` — IANA, e.g. `America/New_York`
-
-
-            Any other key is stored and returned untouched, but nothing renders it.'
-          example:
-            country: US
-            admin1: NV
-            city: Las Vegas
-            lat: 36.17
-            lng: -115.14
-        canonicalFields:
-          type: object
-          description: 'Canonical fields (queryable, indexable). Common keys: address, phone, email, website. **Full-replace on PATCH** — sending one key drops every other. Read-modify-write when partially updating.'
-        editorialFields:
-          type: object
-          description: 'Editorial copy. Conventional keys: description, seoTitle, seoDescription, ogImage, noindex, canonicalUrl, synonyms, audiences, pricing. **Full-replace on PATCH** — sending `{ editorialFields: { seoTitle: "X" } }` wipes the description and every other key. Admin UI handles this by GET → spread → PATCH; third-party callers must do the same when partially updating.'
-        publishAt:
-          type:
-          - object
-          - 'null'
-          description: Scheduled publish (ISO 8601). Listings with status:draft + publishAt in the past surface as published on read endpoints. Pass null to clear.
-        taxonomies:
-          type: object
-          description: Taxonomy term assignments. Keys are taxonomy slugs; values are arrays of term slugs. Each taxonomy you list gets its assignments replaced — taxonomies you DON'T list are left alone (per-taxonomy partial-update). All slugs must exist or the whole request returns 400 with the unknown pairs (no partial writes). Use [] to clear a taxonomy.
-          example:
-            industries:
-            - automotive-tradeshows
-            regions:
-            - north-america
+          description: Recipe type (e.g., collection, landing, feed)
         slug:
           type: string
-          description: 'New slug. Renaming **preserves the old slug as an alias**: every read that addresses this listing by the old `(listingType, slug)` keeps resolving, and answers with the new slug — so a consumer can compare the two and emit a 301 instead of serving the same listing at two live URLs. `GET .../listing-aliases` returns the whole redirect map for a directory in one call.
-
-
-            Renaming back to a slug this listing previously used consumes that alias rather than creating a cycle. A slug held live, or held as an alias by a **different** listing, is a 409.'
-          pattern: ^[a-z0-9-]+$
-    CreateWebhookDto:
+          description: URL-friendly slug
+          example: top-restaurants-nyc
+        scope:
+          type: object
+          description: Scope definition - filters for which listings to include
+          example:
+            listingType: restaurant
+            taxonomyTerms:
+            - cuisine:italian
+        constraints:
+          type: object
+          description: Constraints for the recipe (e.g., limit, geo bounds)
+          example:
+            limit: 50
+            radius: 10mi
+        ranking:
+          type: object
+          description: Ranking/sorting configuration
+          example:
+            sortBy: rating
+            order: desc
+        seo:
+          type: object
+          description: SEO metadata for the recipe output
+          example:
+            title: Top Italian Restaurants in NYC
+            metaDescription: '...'
+      required:
+      - recipeType
+      - slug
+      - scope
+    CreatePublicMediaDto:
+      type: object
+      properties:
+        url:
+          type: string
+          description: 'Publicly reachable http(s) URL of the image. We fetch it server-side, store the original in R2, and queue variant generation — so the asset survives the source URL going away. The asset is created with `status: "pending"` and flips to `ready` once the original is stored; poll `GET .../media` to watch for it. `data:`, `file:` and private/link-local addresses are rejected with 400.'
+          example: https://cdn.example.com/photos/acme-hall.jpg
+        source:
+          type: string
+          description: Where the image came from, for provenance — e.g. `official_site`, `google_places`, `operator_supplied`. Free-form; defaults to `url`.
+          example: official_site
+        alt:
+          type: string
+          description: Alt text. Set it here — it is the one media field that affects both accessibility and image SEO, and it cannot be inferred from the file.
+        caption:
+          type: string
+          description: Human-readable caption rendered near the image.
+        role:
+          type: string
+          description: Disambiguates what the asset is FOR — consumers pick the page hero by this rather than by position. Closed set; anything else is rejected with 400 rather than silently stored.
+          enum:
+          - hero
+          - thumbnail
+          - gallery
+          - logo
+          - site_screenshot
+          - site_og
+          example: hero
+        sortOrder:
+          type: number
+          description: Display order within the listing, ascending. Ties break on createdAt.
+          minimum: 0
+          default: 0
+      required:
+      - url
+    UpdatePublicDirectoryDto:
       type: object
       properties:
         name:
           type: string
-          description: Friendly name for the webhook (e.g. "CF Pages deploy hook")
-        url:
-          type: string
-          description: Target URL — POSTed on subscribed events
-        events:
-          type: array
-          description: 'Subscribed event names. Empty array = all events fire this webhook. Known events: `listing.created`, `listing.updated`, `listing.deleted` — fired on writes via either admin or public API; `submission.received` — an anonymous suggestion or feedback item needs review. Fired ONLY for items that reach `pending`; spam (honeypot or failed Turnstile) is stored silently and never notifies, so the channel stays worth reading. Payload: `{ submissionId, kind, listingId }`; `review.received` — a public review is waiting for moderation. Like `submission.received`, fired ONLY for items that reach `pending`. Payload: `{ reviewId, listingId, rating }`; `review.approved` — a review was published and the listing''s rating average moved. Consumers that render ratings from a build-time export need this one to know to rebuild. Payload: `{ reviewId, listingId, rating }`; `review.rejected` — a review that WAS published is no longer public, because it was unpublished, rejected or filed as spam. The mirror of `review.approved`, and the more urgent of the pair: it is what a consumer rebuilds on to take defamatory or abusive text off their site. Fired ONLY on the `approved` -> not-approved transition — rejecting a pending review was never public and fires nothing. Payload: `{ reviewId, listingId, rating }`; `comment.received` — a page comment is waiting for moderation. Fired ONLY for items that reach `pending`. Payload: `{ commentId, path }`; `comment.approved` — a page comment was published. A static site that renders comments rebuilds on this. Payload: `{ commentId, path }`; `comment.rejected` — a page comment that WAS published is no longer public (rejected, unpublished or filed as spam). Fired ONLY on the `approved` -> not-approved transition; subscribe to it if you render comments, since it is what takes one down. Payload: `{ commentId, path }`; `comment.updated` — the editors'' reply on a currently-approved comment was set, changed or cleared. Not fired for replies on unpublished comments. Payload: `{ commentId, path }`; `listing.boosted` — a listing became a premium listing, by purchase or by an operator grant. Payload: `{ listingId, paymentId?, amountCents?, currency? }`. A `listing.updated` is ALWAYS fired alongside it, so a consumer already subscribed to that will rebuild without subscribing to this one; subscribe to this if you want to treat a boost specially. `test.ping` — only fired from the test endpoint, bypasses debounce. Unknown names are REJECTED with 400. They used to be accepted for forward-compat, but a typo then produced a webhook that looked healthy and never fired — subscribe to a new event once it exists.'
+          description: Display name of the directory.
+          example: Ecommerce Web Designers
+        listingTypes:
+          type: object
+          description: Listing types this directory declares, keyed by type slug. Replaces the whole map — send every type you want to keep, not just the new one. Each value needs a non-empty `label`; `description` is optional. Removing a type that still has listings is rejected with 409.
           example:
-          - listing.created
-          - listing.updated
-          items:
-            type: string
-            enum:
-            - listing.created
-            - listing.updated
-            - listing.deleted
-            - submission.received
-            - review.received
-            - review.approved
-            - review.rejected
-            - comment.received
-            - comment.approved
-            - comment.rejected
-            - comment.updated
-            - listing.boosted
-            - order.received
-            - order.delivered
-            - directory.updated
-            - test.ping
-        isActive:
-          type: boolean
-          description: Disable without deleting
-        secret:
+            agency:
+              label: Agency
+              description: An ecommerce design or dev agency
+        submissionPolicy:
+          description: 'What this directory accepts from anonymous strangers. MERGED into the stored policy, not replaced — an absent switch keeps its current value, and keys this DTO does not declare (such as `rejectionReasons`) are preserved. That is the opposite of `listingTypes` above, deliberately: removing a listing type has no other expression, whereas turning one switch off must not silently clear the rest of the object.'
+          allOf:
+          - $ref: '#/components/schemas/PublicSubmissionPolicyDto'
+    CreateTaxonomyDto:
+      type: object
+      properties:
+        name:
           type: string
-          description: 'Shared secret for HMAC-SHA256 payload signing. When set, every dispatch includes an `X-ED-Signature: sha256=<hex>` header — verify on your end by computing HMAC-SHA256 of the raw request body using this secret. Verify each ATTEMPT on its own bytes: a retry re-serialises the body with a fresh `timestamp`, so the signature legitimately differs between attempts of the same delivery. To deduplicate, use `X-ED-Delivery-Id`, which is stable across all attempts — see §13 of the integrator changelog. If unset, no signature header is sent (delivery still works). Write-only: no endpoint ever returns it, not even the create response. Responses carry `hasSecret: true|false` instead. Store your copy at the point you generate it — if you lose it, PATCH a new one rather than expecting to read the old one back.'
-        debounceMs:
-          type: number
-          description: 'Debounce window in milliseconds. Multiple events within the window collapse to a single dispatch — useful for collapsing bulk imports into one rebuild. NULL inherits the global default (30 000ms / 30s). Range: 0 (no debounce) to 600 000 (10 minutes) — the full range is honoured, including values ABOVE the global default, which used to be silently capped. When multiple webhooks for a directory specify different values, the smallest wins for the directory as a whole; webhooks leaving it NULL express no preference and do not drag the others down — v1 limitation.'
-          minimum: 0
-          maximum: 600000
+          description: Display name of the taxonomy
+        slug:
+          type: string
+          description: URL-friendly slug
+        structure:
+          type: string
+          description: Taxonomy structure type
+          enum:
+          - flat
+          - hierarchical
+          default: flat
       required:
-      - url
+      - name
+      - slug
     EnrichListingDto:
       type: object
       properties:
@@ -4307,421 +4689,39 @@ components:
 
             The gate is skipped for an id lookup, because you asserted which place this is and there is nothing left to guess. If the returned place''s name disagrees with the listing, the response carries `nameMismatch` — the enrichment still applies, but a stale or mistyped id resolves to a real, wrong business and you should see that rather than have it written silently. Both `places/ChIJ…` and a bare `ChIJ…` are accepted.'
           example: ChIJN1t_tDeuEmsRUsoyG83frY4
-    SweepResearchDto:
+    SetPublicTermsDto:
       type: object
       properties:
-        limit:
+        terms:
+          description: Replace-all set of taxonomy term assignments by slug. Sending an empty array clears all terms.
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicTermAssignmentDto'
+      required:
+      - terms
+    UpdatePublicMediaDto:
+      type: object
+      properties:
+        alt:
+          type: string
+          description: Alt text. Send `""` to clear.
+        caption:
+          type: string
+          description: Caption. Send `""` to clear.
+        role:
+          type: string
+          description: Asset role.
+          enum:
+          - hero
+          - thumbnail
+          - gallery
+          - logo
+          - site_screenshot
+          - site_og
+        sortOrder:
           type: number
-          description: 'How many listings to queue this run. Capped at 100 regardless of what you send: each job is a request to somebody else''s server, and a directory with ten thousand listings must not be able to point a burst that size at one host. The response reports `deferred` when the cap bit, and the next run picks up where this one stopped.'
-          minimum: 1
-          maximum: 100
-          default: 100
-        force:
-          type: boolean
-          description: Re-read every listing regardless of how recently it was last read. Off by default, so a repeated sweep costs only the listings that have gone stale rather than re-fetching the whole directory.
-          default: false
-        staleAfterDays:
-          type: number
-          description: Treat data older than this many days as stale and re-read it. **This is the knob for periodic refresh** — run the same sweep on a schedule and it re-reads only what has aged past the window. `0` means "everything is stale", which is `force` by another name.
+          description: Display order, ascending.
           minimum: 0
-          maximum: 3650
-          default: 90
-        sources:
-          type: array
-          description: 'Which sources to gather from. Defaults to `site` alone.
-
-
-            Each writes into fields prefixed with its own name — `site_title`, `google_rating` — so two sources describing the same thing can never overwrite each other. That convention exists because the unprefixed form already went wrong: a bare `rating` held 2,418 values from a partner import and one from Google, with nothing recording which was which.
-
-
-            **`google_places` is billable.** Google charges per request, where `site` costs only a fetch, so it is never included by default — a sweep over thousands of listings has to ask for it. Matches are confidence-gated: Places returns its best guess with no score, and a listing whose title is not really a place would otherwise be attached to an unrelated nearby business.'
-          default:
-          - site
-          items:
-            type: string
-            enum:
-            - site
-            - google_places
-        declareFields:
-          type: boolean
-          description: 'Create the attribute templates these sources write into, if the directory has not declared them already.
-
-
-            **Send this once, on your first call.** Research only writes into fields the directory has declared — without a template for `site_title` there is nowhere for the title to go, and the sweep succeeds while writing nothing. This declares all of them in one step instead of eleven separate calls.
-
-
-            Templates it creates are marked `{ derived: true, source }`, which is what allows later sweeps to refresh them. **Templates that already exist are left exactly as they are** — if you declared `site_title` yourself and filled it in by hand, this will not quietly convert it into a field a sweep may overwrite.'
-          default: false
-        ingestOg:
-          type: boolean
-          description: 'Fetch each page''s og:image and store it as a `site_og` media asset, rather than keeping only the URL. **On by default.**
-
-
-            The URL alone means every image you render is a hotlink to someone else''s CDN. These are marketing sites — they redesign, change host, and rotate cache-busting paths, and when they do your listing shows a broken image with nothing to say it happened. Importing once makes the bytes yours.
-
-
-            Costs one fetch and one stored image per listing, so set `false` if you only want the text fields. A listing that already has a `site_og` is left alone — re-running updates the `site_og_image` field but never replaces the stored asset.'
-          default: true
-        listingSlugs:
-          description: 'Research these listings specifically, by slug, instead of letting the sweep choose.
-
-
-            A named set is an **instruction**, so the staleness window is bypassed — asking for a listing by name gets it re-read. Unlike a screenshot this destroys nothing: each read is stored as its own snapshot, so the previous evidence survives.
-
-
-            Slugs that match nothing come back as `unmatchedSlugs` rather than being silently dropped. Still subject to the per-run cap.'
-          maxItems: 100
-          example:
-          - acme-digital
-          - bizapedia
-          type: array
-          items:
-            type: string
-    CreatePublicSnapshotDto:
-      type: object
-      properties:
-        source:
-          type: string
-          description: Source identifier — free-form, but use a stable string per provider (e.g. google_places, hermes_research, manual_csv).
-        externalId:
-          type: string
-          description: Upstream record ID for dedup (e.g. Google place_id, scraper URL hash).
-        payload:
-          type: object
-          description: Raw research/source payload to preserve in the evidence locker.
-        fetchedAt:
-          type: string
-          description: When the underlying source data was fetched. Defaults to now if omitted.
-      required:
-      - source
-      - payload
-    BatchListingsDto:
-      type: object
-      properties:
-        items:
-          description: Array of (listingType, slug) pairs to fetch. Maximum 200 per request — split larger sets into multiple calls. Order of returned items mirrors the input order; missing listings are dropped (not returned as nulls) so callers should diff against the request to detect 404s.
-          type: array
-          items:
-            $ref: '#/components/schemas/BatchListingItem'
-      required:
-      - items
-    UpdateAttributeTemplateDto:
-      type: object
-      properties:
-        label:
-          type: string
-          description: Human-readable label
-        type:
-          type: string
-          description: Attribute data type
-          enum:
-          - string
-          - text
-          - number
-          - boolean
-          - enum
-          - multi
-          - multi_enum
-          - date
-          - datetime
-          - range
-          - url
-          - email
-          - phone
-          - richtext
-          - json
-        isFilterable:
-          type: boolean
-          description: Whether this attribute can be used in filters
-          default: false
-        isSortable:
-          type: boolean
-          description: Whether this attribute can be used for sorting
-          default: false
-        isSeoRelevant:
-          type: boolean
-          description: Whether this attribute is relevant for SEO
-          default: false
-        enumValues:
-          description: Allowed values for enum/multi_enum types
-          example:
-          - option1
-          - option2
-          type: array
-          items:
-            type: string
-        settings:
-          type: object
-          description: Additional settings (validation rules, display hints, etc.)
-          example:
-            min: 0
-            max: 100
-            unit: USD
-    BulkUpsertItemDto:
-      type: object
-      properties:
-        listingType:
-          type: string
-          description: Listing type slug. Must be declared on the directory.
-        slug:
-          type: string
-          description: URL-friendly slug, unique within directory + listingType.
-        title:
-          type: string
-          description: Display title. Required when creating; optional when updating an existing listing, where omitting it leaves the current title alone.
-        status:
-          type: string
-          description: Lifecycle status. Defaults to `draft` on create.
-        geo:
-          type: object
-          description: Structured location. Full-replace, like everywhere else.
-        canonicalFields:
-          type: object
-          description: Free-form canonical fields. Full-replace.
-        editorialFields:
-          type: object
-          description: Free-form editorial fields. Full-replace.
-        taxonomies:
-          type: object
-          description: 'Taxonomy term assignments, keyed by taxonomy slug. Same semantics as on create.
-
-
-            An **array** replaces that taxonomy''s assignments; an **object** applies a delta:
-
-            `{ industries: [''fashion''] }` replaces, `{ industries: { add: [''retail''], remove: [''mining''] } }` adds and removes. Taxonomies not named are untouched either way.
-
-
-            The delta form exists because replace cannot express "add one tag", so two concurrent read-modify-write cycles silently lose one of the additions — nothing errors and a listing just stops appearing under a category. Use the array form for an authoritative full sync and the delta form for a retag.'
-          example:
-            industries:
-              add:
-              - fashion
-              remove:
-              - mining
-        attributes:
-          type: object
-          description: 'Attribute values keyed by `AttributeTemplate.key`.\n\nAccepted here but NOT on the single-listing create, deliberately: the single path has `PUT .../attributes` one call away, whereas in bulk that extra call is the difference between 2N and N round trips — which is the entire point of this endpoint.'
-          example:
-            rating: 4.7
-        parentId:
-          type: string
-          description: Parent listing id, within the same directory.
-        publishAt:
-          type: string
-          description: Scheduled publish time. A past value reads as published.
-      required:
-      - listingType
-      - slug
-    SetPublicAttributesDto:
-      type: object
-      properties:
-        attributes:
-          type: object
-          description: Attribute values keyed by attribute template `key` (not UUID). Unknown keys return 400 with the list of valid keys for this listing type.
-          example:
-            start_date: '2026-01-07'
-            venue: Las Vegas Convention Center
-            expected_attendance: 180000
-      required:
-      - attributes
-    CreatePublicJobDto:
-      type: object
-      properties:
-        jobType:
-          type: string
-          description: Type of job. `media_process`, `recipe_build` and `recipe_rebuild_all` exist on the operator API but are refused here — each would be a button that does nothing, and the 400 names the route that actually does the job.
-          enum:
-          - import
-          - enrichment
-        input:
-          type: object
-          description: 'Job input, passed through to the processor. Shape depends on `jobType` — an `import` wants `{ config: { listingType, ... } }`. Validated by the processor rather than here: `inputJson` is stored as sent, so a malformed input surfaces as a job that fails with a reason rather than a request that 400s and leaves no record.'
-      required:
-      - jobType
-    UpdatePublicDirectoryDto:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Display name of the directory.
-          example: Ecommerce Web Designers
-        listingTypes:
-          type: object
-          description: Listing types this directory declares, keyed by type slug. Replaces the whole map — send every type you want to keep, not just the new one. Each value needs a non-empty `label`; `description` is optional. Removing a type that still has listings is rejected with 409.
-          example:
-            agency:
-              label: Agency
-              description: An ecommerce design or dev agency
-        submissionPolicy:
-          description: 'What this directory accepts from anonymous strangers. MERGED into the stored policy, not replaced — an absent switch keeps its current value, and keys this DTO does not declare (such as `rejectionReasons`) are preserved. That is the opposite of `listingTypes` above, deliberately: removing a listing type has no other expression, whereas turning one switch off must not silently clear the rest of the object.'
-          allOf:
-          - $ref: '#/components/schemas/PublicSubmissionPolicyDto'
-    CreateRecipeDto:
-      type: object
-      properties:
-        recipeType:
-          type: string
-          description: Recipe type (e.g., collection, landing, feed)
-        slug:
-          type: string
-          description: URL-friendly slug
-          example: top-restaurants-nyc
-        scope:
-          type: object
-          description: Scope definition - filters for which listings to include
-          example:
-            listingType: restaurant
-            taxonomyTerms:
-            - cuisine:italian
-        constraints:
-          type: object
-          description: Constraints for the recipe (e.g., limit, geo bounds)
-          example:
-            limit: 50
-            radius: 10mi
-        ranking:
-          type: object
-          description: Ranking/sorting configuration
-          example:
-            sortBy: rating
-            order: desc
-        seo:
-          type: object
-          description: SEO metadata for the recipe output
-          example:
-            title: Top Italian Restaurants in NYC
-            metaDescription: '...'
-      required:
-      - recipeType
-      - slug
-      - scope
-    SweepProbesDto:
-      type: object
-      properties:
-        kind:
-          type: string
-          description: 'What to check.
-
-
-            - `link` (default) — **does this URL resolve?** Keyed per URL, because a host-level answer cannot see a dead path on a live domain. This is what `dead-links` reads.
-
-            - `site` — **what does this page say?** Captures title, description, headings, body text and signals. Keyed per host and shared across directories, so two directories listing the same company pay for one probe.
-
-
-            They are not interchangeable and neither implies the other. A directory can have every URL confirmed alive and no captured content at all — which is exactly the state EpicWebDesigners was in when this parameter was added.'
-          enum:
-          - link
-          - site
-          default: link
-        limit:
-          type: number
-          description: 'How many probes to queue this run. Capped at 500 regardless of what you send — probing costs are pooled across every consumer, so one directory cannot drain the budget for the rest. The response reports `deferred` when the cap bit, and successive runs rotate: candidates are ordered oldest-checked first, so a directory larger than the cap is eventually covered rather than stuck on the same slice.'
-          minimum: 1
-          maximum: 500
-          default: 500
-        force:
-          type: boolean
-          description: 'Re-check URLs whose record is still current. Off by default, so a repeated sweep only covers what has gone stale and is cheap to run on a schedule.
-
-
-            Use it when the checker itself changed and existing verdicts were computed by the old one.'
-          default: false
-    ApplyScreeningDto:
-      type: object
-      properties:
-        dryRun:
-          type: boolean
-          description: Report what would change and write nothing. The counts are computed by the same code path that does the writing, so a dry run cannot disagree with the real one.
-          default: false
-        hold:
-          type: boolean
-          description: 'Pull flagged listings back to draft as well as tagging them. On by default: which verdicts unpublish is a property of the policy, not of the caller. Set false for a tag-only pass when you want to read the queue before anything leaves the directory.'
-          default: true
-        limit:
-          type: number
-          description: How many listings to act on, capped at 2000. The response reports `deferred` when the cap bit rather than implying full coverage.
-          minimum: 1
-          maximum: 2000
-          default: 2000
-    UpdateTaxonomyDto:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Display name of the taxonomy
-    SweepScreenshotsDto:
-      type: object
-      properties:
-        limit:
-          type: number
-          description: How many listings to queue this run. Capped at 50 regardless of what you send — rendering is metered browser time on a shared account, so one directory cannot drain the day for every other consumer. The response reports `deferred` when the cap bit, and the next run picks up where this one stopped.
-          minimum: 1
-          maximum: 50
-          default: 50
-        force:
-          type: boolean
-          description: 'Re-capture listings that already have a screenshot, replacing it. Off by default, so a repeated sweep is cheap and idempotent rather than re-rendering the whole directory.
-
-
-            **Use this when the existing capture is the problem** — a challenge page, or a blank that predates the blank-render check. The replacement is stored and live BEFORE the old asset is removed, so a failed re-capture leaves the current screenshot in place rather than clearing it.'
-          default: false
-        width:
-          type: number
-          description: 'Width of the `site` variant for this run, in pixels. **Send this alone and the height follows the capture''s 3:2** — 400 becomes 400x267, 600 becomes 600x400. That is almost always what you want, and computing 266.67 by hand is how a directory ends up with a variant whose aspect quietly crops every screenshot.
-
-
-            Capped at 1200, the renderer''s own capture width: anything larger is an upscale of pixels that do not exist, which reads as a rendering bug rather than a choice.
-
-
-            Set `enrichmentPolicy.screenshot` on the directory to make a size stick across every sweep; this parameter is for one run.'
-          minimum: 100
-          maximum: 1200
-        height:
-          type: number
-          description: Height of the `site` variant, in pixels. Only needed for an aspect other than the capture's 3:2 — and note that a different aspect means cover-fit CROPS, from the top. 400x252 for instance discards about 5.5% of each capture's height. Capped at 800 for the same reason as `width`.
-          minimum: 1
-          maximum: 800
-        listingSlugs:
-          description: 'Capture these listings specifically, by slug, instead of letting the sweep choose.
-
-
-            A named set is an **instruction**, so the retry window is bypassed — if you can see a listing has no screenshot and ask for it by name, you get an attempt. It does NOT replace an existing screenshot; pass `force` as well for that.
-
-
-            Use it to retry a listing whose URL you just fixed, or to re-capture a few at a new size without re-rendering the directory. Slugs that match nothing come back as `unmatchedSlugs` rather than being silently dropped. Still subject to the per-run cap.'
-          maxItems: 50
-          example:
-          - acme-digital
-          - bizapedia
-          type: array
-          items:
-            type: string
-    BulkUpsertListingsDto:
-      type: object
-      properties:
-        items:
-          description: Listings to upsert, keyed on (listingType, slug). Max 500.
-          type: array
-          items:
-            $ref: '#/components/schemas/BulkUpsertItemDto'
-        atomic:
-          type: boolean
-          description: 'When true, an item that fails aborts the whole request and nothing is written.\n\nDefault is **false** — per-item results, so one bad row cannot reject 499 good ones. That differs from the rest of this API, where a partial write is never allowed, and the difference is deliberate: at this size, all-or-nothing means a 9,000-listing import fails on row 8,997 and you start again. Set true if you need the stricter contract.'
-          default: false
-      required:
-      - items
-    PublicTermAssignmentDto:
-      type: object
-      properties:
-        taxonomy:
-          type: string
-          description: Taxonomy slug (e.g. industries)
-        term:
-          type: string
-          description: Term slug within that taxonomy (e.g. technology)
-      required:
-      - taxonomy
-      - term
   securitySchemes:
     bearer:
       scheme: bearer

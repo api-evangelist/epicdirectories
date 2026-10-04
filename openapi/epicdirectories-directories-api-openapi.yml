@@ -302,23 +302,6 @@ components:
           example:
             primaryColor: '#3b82f6'
             secondaryColor: '#1e40af'
-    CreateFromTemplateDto:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Display name for the new directory
-        template:
-          type: string
-          description: Archetype template to apply
-          enum:
-          - local
-          - product
-          - series
-          - custom
-      required:
-      - name
-      - template
     CreateDirectoryDto:
       type: object
       properties:
@@ -408,6 +391,23 @@ components:
       required:
       - siteKey
       - secret
+    CreateFromTemplateDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Display name for the new directory
+        template:
+          type: string
+          description: Archetype template to apply
+          enum:
+          - local
+          - product
+          - series
+          - custom
+      required:
+      - name
+      - template
   securitySchemes:
     bearer:
       scheme: bearer

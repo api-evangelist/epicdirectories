@@ -16,6 +16,12 @@ modified: '2026-10-02'
 tags:
 - Company
 - Directory
+- Data
+- Catalog
+- Search
+tags_raw:
+- Company
+- Directory
 - API
 - Data
 - Catalog
@@ -26,6 +32,9 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: CapabilityMap
+  url: capabilities/epicdirectories-capability-edges.yml
+  name: EpicDirectories Business Capability Map
 - type: AgenticAccess
   url: agentic-access/epicdirectories-agentic-access.yml
 - type: Spectral
@@ -71,6 +80,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - APIKeys
+  tags_raw:
   - api-keys
   properties:
   - type: OpenAPI
@@ -116,6 +127,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Authentication
+  tags_raw:
   - auth
   properties:
   - type: OpenAPI
@@ -182,6 +195,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Comments
+  tags_raw:
   - comments
   properties:
   - type: OpenAPI
@@ -204,6 +219,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Directories
+  tags_raw:
   - directories
   properties:
   - type: OpenAPI
@@ -226,6 +243,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Domains
+  tags_raw:
   - domains
   properties:
   - type: OpenAPI
@@ -248,6 +267,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Health
+  tags_raw:
   - health
   properties:
   - type: OpenAPI
@@ -270,6 +291,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Job
+  tags_raw:
   - jobs
   properties:
   - type: OpenAPI
@@ -314,6 +337,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Listings
+  tags_raw:
   - listings
   properties:
   - type: OpenAPI
@@ -336,6 +361,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Media Assets
+  tags_raw:
   - media-assets
   properties:
   - type: OpenAPI
@@ -446,6 +473,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Payments
+  tags_raw:
   - payments
   properties:
   - type: OpenAPI
@@ -468,6 +497,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Public
+  tags_raw:
   - public
   properties:
   - type: OpenAPI
@@ -490,6 +521,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Recipes
+  tags_raw:
   - recipes
   properties:
   - type: OpenAPI
@@ -556,6 +589,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Reviews
+  tags_raw:
   - reviews
   properties:
   - type: OpenAPI
@@ -578,6 +613,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Screening
+  tags_raw:
   - screening
   properties:
   - type: OpenAPI
@@ -690,6 +727,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Submissions
+  tags_raw:
   - submissions
   properties:
   - type: OpenAPI
@@ -734,6 +773,8 @@ apis:
   humanURL: https://epicdirectories.com/developers/
   baseURL: https://api.epicdirectories.com
   tags:
+  - Webhook
+  tags_raw:
   - webhooks
   properties:
   - type: OpenAPI

@@ -1,0 +1,12 @@
+{
+ "url": "https://api.epicdirectories.com/openapi.json",
+ "requested_url": "https://api.epicdirectories.com/openapi.json",
+ "status": 200,
+ "content_type": "application/json; charset=utf-8",
+ "bytes": 341271,
+ "sha256": "3d7530d9f5d97cfe5df3b2624cc2e3f3507159260e80c1cb8f4d5129ac47e869",
+ "fetched_at": "2026-10-04",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "equivalent",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the provider's current document describes the same operations (Jaccard 1.0), but the bytes differ, so the archive is an earlier or reformatted copy."
+}

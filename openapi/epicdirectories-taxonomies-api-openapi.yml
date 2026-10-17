@@ -297,18 +297,6 @@ paths:
       - bearer: []
 components:
   schemas:
-    UpdateTermDto:
-      type: object
-      properties:
-        label:
-          type: string
-          description: Display label. Does NOT change the slug — the term is still addressed by its original slug.
-        parentTermId:
-          type: object
-          description: Parent term ID for hierarchical taxonomies
-        metadata:
-          type: object
-          description: 'Free-form metadata. Conventional keys: synonyms, seoKeywords, relatedTopics, description, seoTitle, seoDescription, featured, order. **Full-replace on PATCH** — sending `{ metadata: { synonyms: [...] } }` wipes seoKeywords and every other key. Read-modify-write when partially updating: GET the term, spread its metadata, add your fields, send the merged object back.'
     CreateTermDto:
       type: object
       properties:
@@ -327,6 +315,18 @@ components:
       required:
       - slug
       - label
+    UpdateTermDto:
+      type: object
+      properties:
+        label:
+          type: string
+          description: Display label. Does NOT change the slug — the term is still addressed by its original slug.
+        parentTermId:
+          type: object
+          description: Parent term ID for hierarchical taxonomies
+        metadata:
+          type: object
+          description: 'Free-form metadata. Conventional keys: synonyms, seoKeywords, relatedTopics, description, seoTitle, seoDescription, featured, order. **Full-replace on PATCH** — sending `{ metadata: { synonyms: [...] } }` wipes seoKeywords and every other key. Read-modify-write when partially updating: GET the term, spread its metadata, add your fields, send the merged object back.'
     UpdateTaxonomyDto:
       type: object
       properties:

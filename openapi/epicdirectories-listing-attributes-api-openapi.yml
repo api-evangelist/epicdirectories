@@ -184,18 +184,6 @@ components:
             $ref: '#/components/schemas/AttributeValueDto'
       required:
       - attributes
-    AttributeValueDto:
-      type: object
-      properties:
-        attributeTemplateId:
-          type: string
-          description: Attribute template ID
-        value:
-          type: object
-          description: Value (type depends on attribute template)
-      required:
-      - attributeTemplateId
-      - value
     BulkSetAttributesDto:
       type: object
       properties:
@@ -212,6 +200,18 @@ components:
       required:
       - listingIds
       - attributes
+    AttributeValueDto:
+      type: object
+      properties:
+        attributeTemplateId:
+          type: string
+          description: Attribute template ID
+        value:
+          type: object
+          description: Value (type depends on attribute template)
+      required:
+      - attributeTemplateId
+      - value
   securitySchemes:
     bearer:
       scheme: bearer
